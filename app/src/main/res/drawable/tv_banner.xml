@@ -1,0 +1,48 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+
+    <!-- Background Dark Gradient -->
+    <path
+        android:fillColor="#0A0E14"
+        android:pathData="M0,0h320v180h-320z" />
+
+    <!-- Accent Geometric Cyber Grid Lines -->
+    <path
+        android:strokeColor="#1E2836"
+        android:strokeWidth="1"
+        android:pathData="M0,45 L320,45 M0,90 L320,90 M0,135 L320,135 M80,0 L80,180 M160,0 L160,180 M240,0 L240,180" />
+
+    <!-- Diagonal Accent Line -->
+    <path
+        android:strokeColor="#00FF9D"
+        android:strokeWidth="3"
+        android:pathData="M20,160 L140,40" />
+
+    <path
+        android:strokeColor="#0070F3"
+        android:strokeWidth="2"
+        android:pathData="M35,165 L155,45" />
+
+    <!-- USB / Gamepad Symbol Glow Center -->
+    <!-- Stylized USB Plug Base -->
+    <path
+        android:fillColor="#00FF9D"
+        android:pathData="M145,95 h30 v25 h-30 z" />
+
+    <path
+        android:fillColor="#0070F3"
+        android:pathData="M150,75 h20 v20 h-20 z" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M153,82 h4 v6 h-4 z M163,82 h4 v6 h-4 z" />
+
+    <!-- Center Node Circle -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M160,130 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
+
+</vector>
