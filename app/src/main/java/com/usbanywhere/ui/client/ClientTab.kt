@@ -5,6 +5,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -367,7 +371,9 @@ fun AttachedDeviceBanner(
                     text = "${device.friendlyName} (${device.vendorHex}:${device.productHex})",
                     color = Color.White,
                     fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = if (isReconnecting) {
@@ -421,7 +427,10 @@ fun DiscoveredServerCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
                     imageVector = Icons.Default.Computer,
                     contentDescription = null,
@@ -429,18 +438,22 @@ fun DiscoveredServerCard(
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Column {
+                Column(modifier = Modifier.padding(end = 8.dp)) {
                     Text(
                         text = server.hostName,
                         color = Color.White,
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = "${server.ipAddress}:${server.port}",
                         color = Color.LightGray,
                         fontSize = 12.sp,
-                        fontFamily = FontFamily.Monospace
+                        fontFamily = FontFamily.Monospace,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -459,6 +472,7 @@ fun DiscoveredServerCard(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RemoteDeviceCard(
     device: UsbExportedDevice,
@@ -471,15 +485,18 @@ fun RemoteDeviceCard(
         colors = CardDefaults.cardColors(containerColor = SurfaceDark),
         border = androidx.compose.foundation.BorderStroke(1.dp, if (isAttached) NeonGreen else CardBorder)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(14.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Row(
+                    modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -488,29 +505,42 @@ fun RemoteDeviceCard(
                         text = device.friendlyName,
                         color = Color.White,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-                Spacer(modifier = Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    BadgeText("BUS ${device.busId}", NeonCyan)
-                    BadgeText("VID:${device.vendorHex} PID:${device.productHex}", Color.Gray)
-                    BadgeText(device.speedLabel, Color.LightGray)
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Button(
+                    onClick = onAttach,
+                    enabled = !isAttached,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isAttached) Color(0xFF21262D) else NeonGreen,
+                        contentColor = if (isAttached) Color.LightGray else Color.Black,
+                        disabledContainerColor = Color(0xFF21262D),
+                        disabledContentColor = Color.LightGray
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Cable, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(text = if (isAttached) "Attached" else "Attach", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             }
 
-            Button(
-                onClick = onAttach,
-                enabled = !isAttached,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isAttached) Color.Gray else NeonGreen,
-                    contentColor = Color.Black
-                ),
-                shape = RoundedCornerShape(8.dp)
+            Spacer(modifier = Modifier.height(10.dp))
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Icon(imageVector = Icons.Default.Cable, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(text = if (isAttached) "Attached" else "Attach", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                BadgeText("BUS ${device.busId}", NeonCyan)
+                BadgeText("VID:${device.vendorHex} PID:${device.productHex}", Color.Gray)
+                BadgeText(device.speedLabel, Color.LightGray)
             }
         }
     }

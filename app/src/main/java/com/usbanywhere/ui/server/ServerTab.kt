@@ -37,6 +37,8 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.ui.text.style.TextOverflow
@@ -249,6 +251,7 @@ fun MetricColumn(label: String, value: String) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OtgDeviceCard(
     device: UsbExportedDevice,
@@ -278,14 +281,18 @@ fun OtgDeviceCard(
                             text = device.friendlyName,
                             color = Color.White,
                             fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "${device.manufacturerName} • ${device.speedLabel}",
                         color = Color.LightGray,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
@@ -301,10 +308,10 @@ fun OtgDeviceCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 BadgeText("BUS ${device.busId}", NeonCyan)
                 BadgeText("VID:${device.vendorHex} PID:${device.productHex}", Color.LightGray)
@@ -363,7 +370,10 @@ fun BadgeText(text: String, color: Color) {
             color = color,
             fontSize = 11.sp,
             fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

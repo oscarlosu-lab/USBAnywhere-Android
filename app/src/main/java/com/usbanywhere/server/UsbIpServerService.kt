@@ -45,7 +45,7 @@ class UsbIpServerService : Service() {
         private const val NOTIFICATION_ID = 3240
         private const val DISCOVERY_PORT = 3241
         private const val PROBE_MESSAGE = "USBANYWHERE_DISCOVERY_PROBE"
-        private const val NSD_SERVICE_TYPE = "_usbanywhere._tcp."
+        private const val NSD_SERVICE_TYPE = "_usbanywhere._tcp"
 
         const val ACTION_START = "com.usbanywhere.server.START"
         const val ACTION_STOP  = "com.usbanywhere.server.STOP"

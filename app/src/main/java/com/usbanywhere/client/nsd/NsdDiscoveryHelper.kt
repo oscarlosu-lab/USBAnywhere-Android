@@ -19,8 +19,8 @@ class NsdDiscoveryHelper(
 ) {
     companion object {
         private const val TAG = "NsdDiscoveryHelper"
-        const val SERVICE_TYPE_USBANYWHERE = "_usbanywhere._tcp."
-        const val SERVICE_TYPE_USBIP = "_usbip._tcp."
+        const val SERVICE_TYPE_USBANYWHERE = "_usbanywhere._tcp"
+        const val SERVICE_TYPE_USBIP = "_usbip._tcp"
     }
 
     private val nsdManager = context.getSystemService(Context.NSD_SERVICE) as? NsdManager
