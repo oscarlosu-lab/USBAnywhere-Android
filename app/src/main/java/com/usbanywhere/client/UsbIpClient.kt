@@ -48,8 +48,7 @@ class UsbIpClient {
      */
     suspend fun listRemoteDevices(
         host: String,
-        port: Int = UsbIpConstants.DEFAULT_PORT,
-        pin: String? = null
+        port: Int = UsbIpConstants.DEFAULT_PORT
     ): List<UsbExportedDevice> =
         withContext(Dispatchers.IO) {
             val socket = Socket()
@@ -60,17 +59,6 @@ class UsbIpClient {
 
                 val output = DataOutputStream(BufferedOutputStream(socket.getOutputStream()))
                 val input = DataInputStream(BufferedInputStream(socket.getInputStream()))
-
-                // Send Zero-Trust PIN authentication if provided
-                if (!pin.isNullOrEmpty()) {
-                    UsbIpPackets.writeReqAuth(output, pin)
-                    val (authStatus, authMsg) = UsbIpPackets.readRepAuth(input)
-                    if (authStatus != UsbIpConstants.AUTH_STATUS_SUCCESS) {
-                        Log.w(TAG, "Zero-Trust authentication rejected by $host: $authMsg")
-                        return@withContext emptyList()
-                    }
-                    Log.i(TAG, "Zero-Trust authenticated with $host successfully")
-                }
 
                 // Send OP_REQ_DEVLIST
                 output.writeShort(UsbIpConstants.USBIP_VERSION)
@@ -109,7 +97,6 @@ class UsbIpClient {
         host: String,
         port: Int = UsbIpConstants.DEFAULT_PORT,
         busId: String,
-        pin: String? = null,
         onAttached: (UsbExportedDevice) -> Unit,
         onUnexpectedDisconnect: () -> Unit
     ): Boolean = withContext(Dispatchers.IO) {
@@ -126,17 +113,6 @@ class UsbIpClient {
 
             val output = DataOutputStream(BufferedOutputStream(socket.getOutputStream()))
             val input = DataInputStream(BufferedInputStream(socket.getInputStream()))
-
-            // Send Zero-Trust PIN authentication if provided
-            if (!pin.isNullOrEmpty()) {
-                UsbIpPackets.writeReqAuth(output, pin)
-                val (authStatus, authMsg) = UsbIpPackets.readRepAuth(input)
-                if (authStatus != UsbIpConstants.AUTH_STATUS_SUCCESS) {
-                    Log.w(TAG, "Zero-Trust authentication rejected by $host on attach: $authMsg")
-                    _tunnelState.value = TunnelState.DISCONNECTED
-                    return@withContext false
-                }
-            }
 
             // Send OP_REQ_IMPORT
             output.writeShort(UsbIpConstants.USBIP_VERSION)

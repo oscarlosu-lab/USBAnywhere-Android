@@ -66,7 +66,6 @@ import com.usbanywhere.audio.UsbAudioBridge
 import com.usbanywhere.net.wan.CyberQrGenerator
 import com.usbanywhere.net.wan.WanInterfaceDetector
 import com.usbanywhere.net.wan.WanPairingToken
-import com.usbanywhere.security.ZeroTrustAuthManager
 import com.usbanywhere.theme.CardBorder
 import com.usbanywhere.theme.DeepDarkBg
 import com.usbanywhere.theme.ElectricBlue
@@ -200,7 +199,6 @@ fun SettingsTab(viewModel: SettingsViewModel) {
                         title = "Auto-Start on Device Boot",
                         subtitle = "Starts USB/IP server service quietly in background upon boot (ideal for headless Shield/TV boxes)",
                         checked = autostartOnBoot,
-                        badgeText = "Off by default • Opt-in",
                         onCheckedChange = { viewModel.toggleAutostartOnBoot() }
                     )
 
@@ -214,7 +212,6 @@ fun SettingsTab(viewModel: SettingsViewModel) {
                         title = "Auto-Start on USB Plug-in",
                         subtitle = "Starts server automatically whenever an OTG device is connected to the USB-C port",
                         checked = autostartOnUsb,
-                        badgeText = "Off by default • Opt-in",
                         onCheckedChange = { viewModel.toggleAutostartOnUsb() }
                     )
 
@@ -228,7 +225,6 @@ fun SettingsTab(viewModel: SettingsViewModel) {
                         title = "Kiosk Mode / Dedicated Appliance",
                         subtitle = "Optimizes navigation and prevents accidental UI exits for dedicated 24/7 gaming setups",
                         checked = kioskMode,
-                        badgeText = "Off by default • Opt-in",
                         onCheckedChange = { viewModel.toggleKioskMode() }
                     )
                 }
@@ -379,11 +375,6 @@ fun SettingsTab(viewModel: SettingsViewModel) {
             WanMeshCard()
         }
 
-        // Section: Zero-Trust Security & PIN
-        item {
-            ZeroTrustSecurityCard()
-        }
-
         // Section: UAC2 USB Audio Bridge
         item {
             UsbAudioBridgeCard()
@@ -500,29 +491,27 @@ fun SettingToggleRow(
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(14.dp))
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = title,
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (badgeText != null) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .background(Color(0xFF1E293B), RoundedCornerShape(4.dp))
-                                .border(1.dp, CardBorder, RoundedCornerShape(4.dp))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = badgeText,
-                                color = if (checked) NeonGreen else Color.Gray,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                if (badgeText != null) {
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFF1E293B), RoundedCornerShape(4.dp))
+                            .border(1.dp, CardBorder, RoundedCornerShape(4.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = badgeText,
+                            color = if (checked) NeonGreen else Color.Gray,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(2.dp))
@@ -626,15 +615,13 @@ fun PortSettingRow(
 @Composable
 fun WanMeshCard() {
     val netInfo by WanInterfaceDetector.networkInfo.collectAsStateWithLifecycle()
-    val pin by ZeroTrustAuthManager.activePin.collectAsStateWithLifecycle()
     var showQr by remember { mutableStateOf(false) }
 
     val host = netInfo.meshIp ?: "127.0.0.1"
-    val token = remember(host, pin) {
+    val token = remember(host) {
         WanPairingToken.PairingData(
             host = host,
             port = 3240,
-            pin = pin,
             serverName = "USBAnywhere-Android",
             isTlsEnabled = false
         ).toCompactToken()
@@ -731,101 +718,6 @@ fun WanMeshCard() {
                 ) {
                     CyberQrMatrixView(data = token)
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun ZeroTrustSecurityCard() {
-    val isEnforced by ZeroTrustAuthManager.isAuthEnforced.collectAsStateWithLifecycle()
-    val activePin by ZeroTrustAuthManager.activePin.collectAsStateWithLifecycle()
-    val authorizedPeers by ZeroTrustAuthManager.authorizedPeers.collectAsStateWithLifecycle()
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceDark),
-        border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
-    ) {
-        Column(modifier = Modifier.padding(18.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = null,
-                        tint = if (isEnforced) NeonCyan else Color.Gray,
-                        modifier = Modifier.size(22.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column {
-                        Text(
-                            text = "ZERO-TRUST MUTUAL PIN AUTH",
-                            color = Color.White,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.5.sp
-                        )
-                        Text(
-                            text = if (isEnforced) "Cryptographic Gate Active" else "Open LAN (Unauthenticated)",
-                            color = if (isEnforced) NeonCyan else Color.Gray,
-                            fontSize = 11.sp
-                        )
-                    }
-                }
-
-                Switch(
-                    checked = isEnforced,
-                    onCheckedChange = { ZeroTrustAuthManager.setAuthEnforced(it) },
-                    colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = NeonCyan)
-                )
-            }
-
-            if (isEnforced) {
-                Spacer(modifier = Modifier.height(14.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(text = "DYNAMIC PAIRING PIN:", color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            activePin.forEach { char ->
-                                Box(
-                                    modifier = Modifier
-                                        .background(Color(0xFF0F172A), RoundedCornerShape(6.dp))
-                                        .border(1.dp, NeonCyan, RoundedCornerShape(6.dp))
-                                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                                ) {
-                                    Text(text = char.toString(), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
-                                }
-                            }
-                        }
-                    }
-
-                    Button(
-                        onClick = { ZeroTrustAuthManager.refreshPin() },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B)),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "New PIN", fontSize = 11.sp)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "🔒 ${authorizedPeers.size} authorized peer(s) whitelisted. Rejects rogue network scanners.",
-                    color = Color.LightGray,
-                    fontSize = 11.sp
-                )
             }
         }
     }

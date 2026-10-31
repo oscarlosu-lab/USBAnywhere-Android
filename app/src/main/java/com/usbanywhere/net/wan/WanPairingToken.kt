@@ -11,16 +11,15 @@ object WanPairingToken {
     data class PairingData(
         val host: String,
         val port: Int = 3240,
-        val pin: String = "",
         val serverName: String = "USBAnywhere-Server",
         val isTlsEnabled: Boolean = false
     ) {
         fun toUri(): String {
-            return "usbip://$host:$port?pin=$pin&name=$serverName&tls=$isTlsEnabled"
+            return "usbip://$host:$port?name=$serverName&tls=$isTlsEnabled"
         }
 
         fun toCompactToken(): String {
-            val raw = "${host}|${port}|${pin}|${serverName}|${if (isTlsEnabled) 1 else 0}"
+            val raw = "${host}|${port}|${serverName}|${if (isTlsEnabled) 1 else 0}"
             val encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(raw.toByteArray(StandardCharsets.UTF_8))
             return "UA1:$encoded"
         }
@@ -40,20 +39,19 @@ object WanPairingToken {
                 val rawBytes = Base64.getUrlDecoder().decode(b64)
                 val raw = String(rawBytes, StandardCharsets.UTF_8)
                 val parts = raw.split("|")
-                if (parts.size >= 4) {
+                if (parts.size >= 3) {
                     val host = parts[0]
                     val port = parts[1].toIntOrNull() ?: 3240
-                    val pin = parts[2]
-                    val name = parts[3]
-                    val tls = parts.getOrNull(4) == "1"
-                    return PairingData(host, port, pin, name, tls)
+                    val name = parts[2]
+                    val tls = parts.getOrNull(3) == "1"
+                    return PairingData(host, port, name, tls)
                 }
             } catch (e: Exception) {
                 return null
             }
         }
 
-        // 2. Check standard URI: usbip://<host>:<port>?pin=<pin>&name=<name>&tls=<true|false>
+        // 2. Check standard URI: usbip://<host>:<port>?name=<name>&tls=<true|false>
         if (trimmed.startsWith("usbip://")) {
             try {
                 val withoutScheme = trimmed.substring(8)
@@ -62,7 +60,6 @@ object WanPairingToken {
                 val host = hostPort[0]
                 val port = if (hostPort.size > 1) hostPort[1].toIntOrNull() ?: 3240 else 3240
 
-                var pin = ""
                 var name = "USBAnywhere-Server"
                 var tls = false
 
@@ -72,14 +69,13 @@ object WanPairingToken {
                         val kv = param.split("=")
                         if (kv.size == 2) {
                             when (kv[0].lowercase()) {
-                                "pin" -> pin = kv[1]
                                 "name" -> name = kv[1]
                                 "tls" -> tls = kv[1].toBoolean()
                             }
                         }
                     }
                 }
-                return PairingData(host, port, pin, name, tls)
+                return PairingData(host, port, name, tls)
             } catch (e: Exception) {
                 return null
             }

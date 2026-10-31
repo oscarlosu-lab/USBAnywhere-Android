@@ -2,8 +2,8 @@
 
 🌐 **Idioma / Language:** [English](README.md) | **Español**
 
-**v1.0.0** | **Parte del [Ecosistema USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)**  
-[🌍 Web Oficial](https://oscarlosu-lab.github.io/USBAnywhere/) | [🔗 USBAnywhere Cliente Windows](https://github.com/oscarlosu-lab/USBAnywhere) | [🖥️ USBAnywhere Servidor Windows](https://github.com/oscarlosu-lab/USBAnywhere-Server) | [💬 Comunidad Reddit](https://www.reddit.com/r/UsbAnywhere/) | [☀️ Guía Sunshine & Moonlight](docs/SUNSHINE_MOONLIGHT_INTEGRATION_ES.md)
+**v1.0.1** | **Parte del [Ecosistema USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)**  
+[🌍 Web Oficial](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases y APK](https://github.com/oscarlosu-lab/USBAnywhere-Android/releases/latest) | [🔗 USBAnywhere Cliente Windows](https://github.com/oscarlosu-lab/USBAnywhere) | [🖥️ USBAnywhere Servidor Windows](https://github.com/oscarlosu-lab/USBAnywhere-Server) | [💬 Comunidad Reddit](https://www.reddit.com/r/UsbAnywhere/) | [☀️ Guía Sunshine & Moonlight](docs/SUNSHINE_MOONLIGHT_INTEGRATION_ES.md) | [📖 Roadmap Estratégico](ROADMAP.md) | [🔄 Workflow de Ingeniería](WORKFLOW.md)
 
 [![Web Oficial](https://img.shields.io/badge/Web-USBAnywhere-06B6D4?style=flat-square&logo=googlechrome&logoColor=white)](https://oscarlosu-lab.github.io/USBAnywhere/)
 [![Comunidad Reddit](https://img.shields.io/badge/Reddit-r%2FUsbAnywhere-FF4500?style=flat-square&logo=reddit&logoColor=white)](https://www.reddit.com/r/UsbAnywhere/)
@@ -32,7 +32,7 @@
 | **Conmutador Rápido de Mando** | 🎮 **`Guide + Select` (2.5s)** alterna TV / PC | ❌ Inexistente |
 | **DualSense & Sim Racing** | 🏎️ **Búfer de hápticos dedicado & FFB Jitter-Guard** | ⚠️ Caídas de paquetes y temblores de volante |
 | **Interfaz 10-Foot para Android TV** | 📺 **Foco D-Pad interactivo & Banner Leanback** | 🕰️ Interfaz clásica de teléfono |
-| **Seguridad WAN & Zero-Trust** | 🔒 **Tailscale, WireGuard, Código QR Cyber & PIN** | ❌ Reenvío de puertos manual sin cifrar |
+| **Seguridad WAN & Privacidad** | 🔒 **Tailscale, WireGuard & Código QR Cyber** | ❌ Reenvío de puertos manual sin cifrar |
 | **Tamaño del Paquete** | 🚀 **APK de 2.07 MB** (Incluye catálogo de 20.5K dispositivos) | ~6 MB |
 
 ---
@@ -80,6 +80,7 @@ flowchart LR
 | **[Web Oficial](https://oscarlosu-lab.github.io/USBAnywhere/)** | 🌍 Portal Web | Guías interactivas, documentación y centro de descargas |
 | **[Comunidad Reddit](https://www.reddit.com/r/UsbAnywhere/)** | 💬 r/UsbAnywhere | Soporte, debates, configuraciones de la comunidad y anuncios |
 | **[Apoyar en Ko-fi](https://ko-fi.com/oscarlosu)** | ☕ Comunidad | Apoya el hosting, pruebas de hardware y desarrollo libre |
+| **[Descargas y Mirrors](https://github.com/oscarlosu-lab/USBAnywhere-Downloads)** | 📦 Archivo Backup | Mirror de distribución centralizado y verificación de checksums |
 
 ---
 
@@ -91,6 +92,14 @@ flowchart LR
 - Servicio en primer plano con `WakeLock` y `WifiLock` de alto rendimiento para evitar reposo por ahorro de batería.
 
 ### 🎮 Sinergia Gaming y Motor de Sondeo Esports
+
+### 📱 Ejecución en Segundo Plano y Juegos Móviles
+- **Persistencia mediante Foreground Service**:
+  - Se ejecuta como un servicio en primer plano persistente (`UsbIpServerService`) con `android:foregroundServiceType="connectedDevice"`.
+  - Mantiene un `WakeLock` de CPU y un `WifiLock` de alto rendimiento (`WIFI_MODE_FULL_HIGH_PERF`), garantizando que Android nunca mate el servidor ni reduzca las frecuencias mientras juegas en el móvil o alternas entre aplicaciones.
+  - Notificación informativa permanente en la barra de estado con métricas de conexión en tiempo real.
+
+### 🎮 HUD Visual Esports y Simulador
 - **Auto-Handoff Sunshine & Atajo de Mando**:
   - Microservidor HTTP integrado (Puerto 3242) para comandos `do` y `undo` de Sunshine.
   - Atajo de mando (`Guide + Select` durante 2.5s) para alternar el control entre Android TV y el PC remoto.
@@ -107,8 +116,8 @@ flowchart LR
 - **Detección Nativa de Tailscale y WireGuard**:
   - Detección automática de rangos CGNAT (`100.64.0.0/10`) y adaptadores VPN.
   - Generador de tokens compactos (`UA1:...`) y renderizador de códigos QR Cyber 25x25 directamente en Jetpack Compose sin librerías externas.
-- **Autenticación Mutua por PIN Zero-Trust & TLS 1.3**:
-  - Opcode binario `OP_REQ_AUTH (0x8008)` con PIN efímero de 6 dígitos mediante CSPRNG y bloqueo automático ante fuerza bruta (5 fallos = bloqueo de 5 min).
+- **Conexión Directa WAN Mesh & TLS 1.3**:
+  - Negociación USB/IP estándar compatible con el borrador RFC sobre túneles seguros (Tailscale/WireGuard) sin fricción de PIN.
 - **Puente de Audio USB UAC2 & Micrófono**:
   - Puente estéreo PCM a 48 kHz / 16 bits con latencia seleccionable: **2ms** (Esports en LAN), **4ms** (Wi-Fi), **8ms** (Internet WAN).
 
@@ -121,14 +130,43 @@ flowchart LR
 - Catálogo SQLite offline con 3,427 fabricantes y 20,551 productos oficiales USB-IF.
 - Clasificación semántica automática: 🎮 Gamepad, 🏎️ Volante, 🖱️ Ratón, ⌨️ Teclado, 📷 Cámara, 🖨️ Impresora 3D, 🎧 Audio, 💾 Almacenamiento, 🔌 Genérico.
 
-### 🛡️ Inicio y conexión USB bajo demanda
-- El inicio y la respuesta automática a conexiones USB están desactivados por defecto. Actívalos desde Ajustes si quieres ese comportamiento.
+### 🛡️ Política de No Intrusión (Opt-In Estricto)
+- Receptores de arranque (`BootCompletedReceiver`) y conexión USB (`UsbAttachedReceiver`) desactivados por defecto en el Manifest (`android:enabled="false"`).
+- Activación dinámica mediante `PackageManager.setComponentEnabledSetting` solo cuando el usuario lo habilita voluntariamente en Ajustes.
 
 ---
 
-## 🔒 Seguridad
+---
 
-Para reportar vulnerabilidades, consulta la [Política de Seguridad de USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere/blob/main/SECURITY.md).
+## 📱 Navegación y Arquitectura de la Aplicación
+
+La interfaz de usuario está desarrollada íntegramente en **Jetpack Compose Material 3** con foco interactivo D-Pad de alto contraste para Android TV / Google TV:
+
+| Pestaña | Icono | Propósito |
+|---|:---:|---|
+| **Servidor** | 🔌 | Control del servidor USB/IP rootless con un toque, detección OTG en tiempo real y tarjeta principal de estado. |
+| **Cliente** | 💻 | Auto-descubrimiento de servidores USB/IP por mDNS y UDP 3241, conexión manual por IP y tarjeta de asistencia. |
+| **Gamepad** | 🎮 | Monitor de sondeo en vivo (Hz, jitter, mín/máx), simulador a 1000/8000 Hz, alternancia Sunshine y slots multijugador fijos. |
+| **Ajustes** | ⚙️ | Optimización de baja latencia (`TCP_NODELAY`, búfers circulares), arranque opcional en inicio/USB, modo kiosco y puertos (:3240, :3242). |
+
+## 🛠️ Compilación y Pruebas
+
+```powershell
+# 1. Ejecutar las 38 pruebas unitarias
+.\gradlew.bat test
+
+# 2. Generar APK Release minificado y firmado (2.07 MB)
+.\gradlew.bat assembleRelease
+
+# 3. Generar Google Play App Bundle firmado (4.26 MB)
+.\gradlew.bat bundleRelease
+```
+
+---
+
+## 🔒 Política de Seguridad y Contribuciones
+
+Este repositorio sigue las directivas estrictas de seguridad y calidad de código. Se admiten contribuciones, auditorías de seguridad y reportes de incidencias a través de Pull Requests e Issues en GitHub.
 
 ---
 

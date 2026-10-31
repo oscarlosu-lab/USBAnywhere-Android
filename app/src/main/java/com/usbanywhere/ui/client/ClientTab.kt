@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -166,7 +167,9 @@ fun ClientTab(viewModel: ClientViewModel) {
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = ElectricBlue,
-                                contentColor = Color.White
+                                contentColor = Color.White,
+                                disabledContainerColor = Color(0xFF1E2836),
+                                disabledContentColor = Color(0xFF64748B)
                             ),
                             shape = RoundedCornerShape(10.dp),
                             enabled = !isConnecting && manualIp.isNotBlank()
@@ -202,6 +205,13 @@ fun ClientTab(viewModel: ClientViewModel) {
                         }
                     }
                 }
+            }
+        }
+
+        // Helpful empty state when no servers or devices are active
+        if (servers.isEmpty() && remoteDevices.isEmpty()) {
+            item {
+                ClientInstructionsCard()
             }
         }
 
@@ -502,6 +512,43 @@ fun RemoteDeviceCard(
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(text = if (isAttached) "Attached" else "Attach", fontWeight = FontWeight.Bold, fontSize = 12.sp)
             }
+        }
+    }
+}
+
+@Composable
+fun ClientInstructionsCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+        border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Default.Computer,
+                contentDescription = null,
+                tint = NeonCyan,
+                modifier = Modifier.size(36.dp)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Connect to a Remote USB Server",
+                color = Color.White,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Start USBAnywhere on your PC or Linux host on the same network, then tap 'Auto-Scan' or enter its IP address to view and attach shared USB peripherals.",
+                color = Color.LightGray,
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+                lineHeight = 17.sp
+            )
         }
     }
 }

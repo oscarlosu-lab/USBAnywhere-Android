@@ -5,7 +5,6 @@ import android.util.Log
 import com.usbanywhere.protocol.UsbIpConstants
 import com.usbanywhere.protocol.UsbIpPackets
 import com.usbanywhere.protocol.UsbIpUrb
-import com.usbanywhere.security.ZeroTrustAuthManager
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.DataInputStream
@@ -28,7 +27,6 @@ class UsbIpServerWorker(
     @Volatile
     private var isRunning = true
     private var attachedBusId: String? = null
-    private var isAuthenticated = false
 
     override fun run() {
         try {
@@ -54,35 +52,6 @@ class UsbIpServerWorker(
                     // Handshake Management Phase
                     val opCode = input.readShort()
                     val status = input.readInt()
-
-                    // Check Zero-Trust Authentication
-                    when (opCode) {
-                        UsbIpConstants.OP_REQ_AUTH -> {
-                            val pin = UsbIpPackets.readReqAuth(input)
-                            val isValid = ZeroTrustAuthManager.validatePin(pin, clientIp)
-                            if (isValid) {
-                                isAuthenticated = true
-                                UsbIpPackets.writeRepAuth(output, UsbIpConstants.AUTH_STATUS_SUCCESS, "Authenticated")
-                                Log.i(TAG, "Client $clientIp authenticated successfully via Zero-Trust PIN")
-                            } else {
-                                UsbIpPackets.writeRepAuth(output, UsbIpConstants.AUTH_STATUS_BAD_PIN, "Invalid PIN")
-                                Log.w(TAG, "Client $clientIp failed Zero-Trust authentication")
-                                break // Disconnect unauthorized client
-                            }
-                            continue
-                        }
-                    }
-
-                    // For all other management opcodes, enforce authentication if enabled
-                    val isAuthorized = !ZeroTrustAuthManager.isAuthEnforced.value ||
-                            isAuthenticated ||
-                            ZeroTrustAuthManager.authorizedPeers.value.contains(clientIp)
-
-                    if (!isAuthorized) {
-                        Log.w(TAG, "Rejecting unauthenticated client $clientIp for opcode 0x${Integer.toHexString(opCode.toInt())}")
-                        UsbIpPackets.writeRepAuth(output, UsbIpConstants.AUTH_STATUS_UNAUTHORIZED, "Authentication Required")
-                        break
-                    }
 
                     when (opCode) {
                         UsbIpConstants.OP_REQ_DEVLIST -> {

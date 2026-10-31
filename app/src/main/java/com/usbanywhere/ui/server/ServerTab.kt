@@ -37,6 +37,9 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -149,7 +152,11 @@ fun ServerStatusHeroCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 12.dp)
+                ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
@@ -170,9 +177,11 @@ fun ServerStatusHeroCard(
                     Text(
                         text = if (stats.isRunning) "${stats.listeningIp}:${stats.listeningPort}" else "Ready to share OTG devices",
                         color = Color.White,
-                        fontSize = 18.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace
+                        fontFamily = FontFamily.Monospace,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
@@ -182,7 +191,9 @@ fun ServerStatusHeroCard(
                         containerColor = if (stats.isRunning) AccentError else NeonGreen,
                         contentColor = Color.Black
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                    modifier = Modifier.defaultMinSize(minWidth = 105.dp)
                 ) {
                     Icon(
                         imageVector = if (stats.isRunning) Icons.Default.Stop else Icons.Default.PlayArrow,
@@ -192,7 +203,9 @@ fun ServerStatusHeroCard(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = if (stats.isRunning) "STOP" else "START",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }

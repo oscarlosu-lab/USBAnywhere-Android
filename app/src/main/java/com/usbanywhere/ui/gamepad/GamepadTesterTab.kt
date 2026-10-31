@@ -9,6 +9,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -154,7 +156,10 @@ fun PollingRateHeroCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Box(
                         modifier = Modifier
                             .size(10.dp)
@@ -165,12 +170,14 @@ fun PollingRateHeroCard(
                     Text(
                         text = gamepadState.deviceName,
                         color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Button(
                         onClick = onToggleSim,
                         colors = ButtonDefaults.buttonColors(
@@ -178,6 +185,7 @@ fun PollingRateHeroCard(
                             contentColor = Color.White
                         ),
                         shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                         modifier = Modifier
                             .focusable()
                             .onFocusChanged { isSimBtnFocused = it.isFocused }
@@ -190,13 +198,14 @@ fun PollingRateHeroCard(
                         Icon(
                             imageVector = if (isSimulating) Icons.Default.Stop else Icons.Default.PlayArrow,
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = if (isSimulating) "Stop Sim" else "1000 Hz Sim",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                            text = if (isSimulating) "Stop" else "1000 Hz",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
                     }
 
@@ -207,6 +216,7 @@ fun PollingRateHeroCard(
                             contentColor = Color.LightGray
                         ),
                         shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                         modifier = Modifier
                             .focusable()
                             .onFocusChanged { isResetBtnFocused = it.isFocused }
@@ -216,9 +226,9 @@ fun PollingRateHeroCard(
                                 shape = RoundedCornerShape(8.dp)
                             )
                     ) {
-                        Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Reset", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Reset", fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                     }
                 }
             }
@@ -748,53 +758,60 @@ fun SunshineHandoffCard(
             }
 
             Spacer(modifier = Modifier.height(14.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = "Sunshine Webhook Hook:",
-                        color = Color.Gray,
-                        fontSize = 10.sp
-                    )
-                    Text(
-                        text = "POST http://<IP>:3242/api/stream/start",
-                        color = ElectricBlue,
-                        fontSize = 11.sp,
-                        fontFamily = FontFamily.Monospace
-                    )
-                }
 
-                Button(
-                    onClick = onToggle,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (mode == HandoffMode.LOCAL_ANDROID_TV) Color(0xFF1E293B) else Color(0xFF0F3D3E),
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier
-                        .focusable()
-                        .onFocusChanged { isToggleFocused = it.isFocused }
-                        .border(
-                            width = if (isToggleFocused) 2.dp else 1.dp,
-                            color = if (isToggleFocused) NeonCyan else CardBorder,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.SwapHoriz,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
+            // Webhook Info Box
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF0D1117), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = "SUNSHINE WEBHOOK HOOK:",
+                    color = Color.Gray,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "POST http://<IP>:3242/api/stream/start",
+                    color = ElectricBlue,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Switch Mode Button
+            Button(
+                onClick = onToggle,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (mode == HandoffMode.LOCAL_ANDROID_TV) Color(0xFF1E293B) else Color(0xFF0F3D3E),
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusable()
+                    .onFocusChanged { isToggleFocused = it.isFocused }
+                    .border(
+                        width = if (isToggleFocused) 2.dp else 1.dp,
+                        color = if (isToggleFocused) NeonCyan else CardBorder,
+                        shape = RoundedCornerShape(10.dp)
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = if (mode == HandoffMode.LOCAL_ANDROID_TV) "Switch to PC" else "Switch to TV",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.SwapHoriz,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (mode == HandoffMode.LOCAL_ANDROID_TV) "Switch to PC Streaming" else "Switch to TV Navigation",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

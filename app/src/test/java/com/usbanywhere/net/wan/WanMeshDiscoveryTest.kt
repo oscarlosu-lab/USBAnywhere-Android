@@ -28,19 +28,17 @@ class WanMeshDiscoveryTest {
         val original = WanPairingToken.PairingData(
             host = "100.88.99.12",
             port = 3240,
-            pin = "482019",
             serverName = "Shield-Pro-LivingRoom",
             isTlsEnabled = true
         )
 
         // 1. URI encoding & parsing
         val uri = original.toUri()
-        assertTrue(uri.startsWith("usbip://100.88.99.12:3240?pin=482019"))
+        assertTrue(uri.startsWith("usbip://100.88.99.12:3240?name=Shield-Pro-LivingRoom"))
         val parsedUri = WanPairingToken.parse(uri)
         assertNotNull(parsedUri)
         assertEquals(original.host, parsedUri?.host)
         assertEquals(original.port, parsedUri?.port)
-        assertEquals(original.pin, parsedUri?.pin)
         assertEquals(original.serverName, parsedUri?.serverName)
         assertEquals(original.isTlsEnabled, parsedUri?.isTlsEnabled)
 
@@ -51,14 +49,13 @@ class WanMeshDiscoveryTest {
         assertNotNull(parsedToken)
         assertEquals(original.host, parsedToken?.host)
         assertEquals(original.port, parsedToken?.port)
-        assertEquals(original.pin, parsedToken?.pin)
         assertEquals(original.serverName, parsedToken?.serverName)
         assertEquals(original.isTlsEnabled, parsedToken?.isTlsEnabled)
     }
 
     @Test
     fun testCyberQrMatrixGeneration() {
-        val testData = "usbip://100.64.1.2:3240?pin=123456"
+        val testData = "usbip://100.64.1.2:3240?name=Server"
         val matrix = CyberQrGenerator.generateMatrix(testData)
 
         assertEquals(CyberQrGenerator.MATRIX_SIZE, matrix.size)

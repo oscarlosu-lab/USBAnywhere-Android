@@ -2,8 +2,8 @@
 
 🌐 **Language / Idioma:** **English** | [Español](README_ES.md)
 
-**v1.0.0** | **Part of the [USBAnywhere Ecosystem](https://github.com/oscarlosu-lab/USBAnywhere)**  
-[🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [🔗 USBAnywhere Windows Client](https://github.com/oscarlosu-lab/USBAnywhere) | [🖥️ USBAnywhere Windows Server](https://github.com/oscarlosu-lab/USBAnywhere-Server) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [☀️ Sunshine & Moonlight Setup](docs/SUNSHINE_MOONLIGHT_INTEGRATION_EN.md)
+**v1.0.1** | **Part of the [USBAnywhere Ecosystem](https://github.com/oscarlosu-lab/USBAnywhere)**  
+[🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & APK](https://github.com/oscarlosu-lab/USBAnywhere-Android/releases/latest) | [🔗 USBAnywhere Windows Client](https://github.com/oscarlosu-lab/USBAnywhere) | [🖥️ USBAnywhere Windows Server](https://github.com/oscarlosu-lab/USBAnywhere-Server) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [☀️ Sunshine & Moonlight Setup](docs/SUNSHINE_MOONLIGHT_INTEGRATION_EN.md) | [📖 Strategic Roadmap](ROADMAP.md) | [🔄 Engineering Workflow](WORKFLOW.md)
 
 [![Website](https://img.shields.io/badge/Website-USBAnywhere-06B6D4?style=flat-square&logo=googlechrome&logoColor=white)](https://oscarlosu-lab.github.io/USBAnywhere/)
 [![Reddit Community](https://img.shields.io/badge/Reddit-r%2FUsbAnywhere-FF4500?style=flat-square&logo=reddit&logoColor=white)](https://www.reddit.com/r/UsbAnywhere/)
@@ -32,7 +32,7 @@
 | **Gamepad Quick-Toggle** | 🎮 **`Guide + Select` (2.5s)** switch TV/PC | ❌ None |
 | **DualSense & Sim Racing** | 🏎️ **Dedicated Haptics Buffer & FFB Jitter-Guard** | ⚠️ Packet drop & wheel shudder over Wi-Fi |
 | **Android TV / Shield 10-Foot UI** | 📺 **Native D-Pad Focus & Leanback Banner** | 🕰️ Basic Android interface |
-| **WAN & Zero-Trust Security** | 🔒 **Tailscale, WireGuard, Cyber QR & PIN Auth** | ❌ Manual port forwarding |
+| **WAN & Remote Connectivity** | 🔒 **Tailscale, WireGuard & Cyber QR Token** | ❌ Manual port forwarding |
 | **Package Size** | 🚀 **2.07 MB APK** (Includes 20.5K device database) | ~6 MB |
 
 ---
@@ -80,6 +80,7 @@ flowchart LR
 | **[Official Website](https://oscarlosu-lab.github.io/USBAnywhere/)** | 🌍 Web Portal | Interactive guides, documentation & download hub |
 | **[Reddit Community](https://www.reddit.com/r/UsbAnywhere/)** | 💬 r/UsbAnywhere | Support, discussions, community setups & announcements |
 | **[Support on Ko-fi](https://ko-fi.com/oscarlosu)** | ☕ Community | Support hosting, driver testing & open-source engineering |
+| **[Downloads & Mirrors](https://github.com/oscarlosu-lab/USBAnywhere-Downloads)** | 📦 Backup Archive | Centralized distribution mirror and checksum verification |
 
 ---
 
@@ -91,6 +92,14 @@ flowchart LR
 - High-Performance Foreground Service with `WakeLock` and `WifiLock` preventing Android OS power throttling.
 
 ### 🎮 Gaming Synergy & Esports Polling Engine
+
+### 📱 Background Execution & Mobile Gaming
+- **Full Foreground Service Persistence**:
+  - Operates as a resilient Android Foreground Service (`UsbIpServerService`) typed with `android:foregroundServiceType="connectedDevice"`.
+  - Holds an active `PARTIAL_WAKE_LOCK` and `WIFI_MODE_FULL_HIGH_PERF` lock, ensuring the Android kernel never throttles network traffic or kills the USB mediation daemon when running mobile games, emulators, or switching apps.
+  - Informative persistent status notification in the Android notification shade with real-time client connection metrics.
+
+### 🎮 Live Esports Gamepad HUD & Simulator
 - **Sunshine Auto-Handoff & Quick-Toggle**:
   - Embedded HTTP micro-server (Port 3242) for Sunshine `do` and `undo` commands.
   - Gamepad combo (`Guide + Select` held for 2.5s) toggles control between Android TV navigation and PC USB/IP streaming.
@@ -107,8 +116,8 @@ flowchart LR
 - **Tailscale & WireGuard Native Discovery**:
   - Automatically identifies CGNAT (`100.64.0.0/10`) and VPN interfaces.
   - Generates compact pairing tokens (`UA1:...`) and renders dynamic Cyber QR codes natively on Compose Canvas without heavy third-party libraries.
-- **Zero-Trust Mutual PIN Authentication & TLS 1.3**:
-  - Binary opcode `OP_REQ_AUTH (0x8008)` with ephemeral CSPRNG 6-digit PIN and brute-force lockout (5 attempts = 5 min ban).
+- **Friction-Free WAN Mesh & TLS 1.3**:
+  - Direct RFC-compliant USB/IP protocol negotiation over encrypted VPN tunnels (Tailscale/WireGuard) with zero PIN friction.
 - **UAC2 Audio & Headset Microphone Bridge**:
   - 48 kHz / 16-bit PCM stereo bridge with user-selectable buffer profiles: **2ms** (Esports local), **4ms** (Wi-Fi), **8ms** (WAN).
 
@@ -121,14 +130,82 @@ flowchart LR
 - Offline SQLite catalog with 3,427 vendors and 20,551 products indexed from official USB-IF databases.
 - Semantic classification: 🎮 Gamepad, 🏎️ Racing Wheel, 🖱️ Mouse, ⌨️ Keyboard, 📷 Camera, 🖨️ 3D Printer, 🎧 Audio, 💾 Storage, 🔌 Generic.
 
-### 🛡️ Opt-In Startup and USB Connection
-- Startup and USB-attachment automation are off by default. Enable them from Settings if you want the app to respond automatically.
+### 🛡️ Non-Intrusive Opt-In Architecture
+- `BootCompletedReceiver` and `UsbAttachedReceiver` are `android:enabled="false"` by default in the Manifest.
+- Dynamic `PackageManager.setComponentEnabledSetting` ensures zero background battery drain or unwanted OS dialogs until explicitly enabled in Settings.
 
 ---
 
-## 🔒 Security
+---
 
-For vulnerability reporting, see the [USBAnywhere Security Policy](https://github.com/oscarlosu-lab/USBAnywhere/blob/main/SECURITY.md).
+## 📱 Navigation & App Architecture
+
+The user interface is built on **Jetpack Compose Material 3** with native 10-foot D-Pad remote control focus indicators for Android TV / Google TV:
+
+| Tab | Icon | Purpose |
+|---|:---:|---|
+| **Server** | 🔌 | One-tap rootless USB/IP server start/stop, real-time USB-OTG peripheral discovery, and connection status hero card. |
+| **Client** | 💻 | Auto-discovery of remote USB/IP servers via mDNS & UDP 3241, manual host IP connection, and connection guide. |
+| **Gamepad** | 🎮 | Live polling rate monitor in Hz, jitter ($\sigma$ in ms), 1000/8000 Hz simulator, Sunshine auto-handoff, and multiplayer slot locks. |
+| **Settings** | ⚙️ | Esports low-latency tuning (`TCP_NODELAY`, ring buffers), opt-in auto-start on boot/USB, TV kiosk mode, and port configuration (:3240, :3242). |
+
+## 📁 Source Tree Structure
+
+```text
+app/src/main/
+├── AndroidManifest.xml                  # Leanback, Non-Touch, USB Host, Foreground Service
+├── assets/
+│   └── usb_catalog.db                   # SQLite database (3,427 vendors, 20,551 products)
+├── java/com/usbanywhere/
+│   ├── MainActivity.kt                  # Edge-to-edge Compose host & D-Pad key dispatcher
+│   ├── audio/                           # UAC2 Audio Bridge & Jitter Buffering
+│   ├── catalog/                         # Semantic Hardware Classification Engine (SQLite)
+│   ├── client/                          # USB/IP Client Implementation (mDNS, UDP, Roaming)
+│   ├── data/                            # Persistent AppPreferences & UsbModels
+│   ├── gamepad/                         # Gamepad Testing & Polling Rate Engine
+│   ├── gaming/sunshine/                 # Sunshine Webhook (Port 3242) & Handoff Manager
+│   ├── network/wan/                     # Tailscale/WireGuard WAN & Cyber QR Matrix
+│   ├── protocol/                        # Standard Binary USB/IP Wire Protocol (RFC Draft)
+│   ├── receiver/                        # Non-Intrusive Boot & USB Attached Receivers
+│   ├── security/                        # TLS 1.3 Socket Factory & Encryption Helpers
+│   ├── server/                          # Rootless USB/IP Server Daemon (Port 3240)
+│   └── ui/                              # Jetpack Compose Material 3 (Cyber Neon Theme)
+└── res/drawable/
+    └── tv_banner.xml                    # Android TV 320x180 dp Leanback home banner
+```
+
+---
+
+## 🛠️ Building & Verification
+
+### Prerequisites
+- **JDK**: JDK 17+ or JDK 21 (Microsoft Hotspot)
+- **Android SDK**: Build Tools 35.0.0+, Platform API 35/36
+- **Gradle**: 8.9+ (Wrapper included)
+
+### Compilation Commands
+```powershell
+# 1. Run unit test suite (38 tests)
+.\gradlew.bat test
+
+# 2. Build Minified Signed Production APK (2.07 MB)
+.\gradlew.bat assembleRelease
+
+# 3. Build Google Play Store App Bundle (4.26 MB)
+.\gradlew.bat bundleRelease
+```
+
+### Automated Testing & Quality Gate
+```powershell
+# Execute the full unit test suite (38 tests)
+.\gradlew.bat test
+```
+
+---
+
+## 🔒 Security & Contribution Policy
+
+This repository adheres to strict Zero-Trust engineering and security practices. Contributions, security audits, and issue reports are welcomed via standard GitHub Pull Requests and Issues.
 
 ---
 

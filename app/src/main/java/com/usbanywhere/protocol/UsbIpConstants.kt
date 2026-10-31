@@ -10,15 +10,6 @@ object UsbIpConstants {
     const val OP_REQ_IMPORT: Short  = 0x8003.toShort()
     const val OP_REP_IMPORT: Short  = 0x0003.toShort()
 
-    // Zero-Trust Security Extension OP Codes
-    const val OP_REQ_AUTH: Short    = 0x8008.toShort()
-    const val OP_REP_AUTH: Short    = 0x0008.toShort()
-
-    const val AUTH_STATUS_SUCCESS      = 0
-    const val AUTH_STATUS_BAD_PIN      = 1
-    const val AUTH_STATUS_UNAUTHORIZED = 2
-    const val AUTH_STATUS_TIMEOUT      = 3
-
     // URB Transfer Command Codes (Streaming)
     const val USBIP_CMD_SUBMIT = 0x00000001
     const val USBIP_RET_SUBMIT = 0x00000003
