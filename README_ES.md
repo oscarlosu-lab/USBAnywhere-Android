@@ -51,7 +51,7 @@ flowchart LR
 
     subgraph Red ["🌐 Red de Baja Latencia (LAN / Tailscale VPN)"]
         direction TB
-        NET["Puerto TCP 3240 (USB/IP)<br>Puerto HTTP 3242 (Webhook Sunshine)<br>Descubrimiento mDNS (_usbanywhere._tcp.)"]
+        NET["Puerto TCP 3240 (USB/IP)<br>Puerto HTTP 3242 (Webhook Sunshine)<br>Descubrimiento mDNS (_usbanywhere._tcp)"]
     end
 
     subgraph PCGaming ["🖥️ Habitación Gaming / Host Cloud"]

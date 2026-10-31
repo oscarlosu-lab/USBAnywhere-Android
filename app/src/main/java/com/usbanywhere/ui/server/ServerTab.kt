@@ -362,7 +362,7 @@ fun OtgDeviceCard(
 fun BadgeText(text: String, color: Color) {
     Box(
         modifier = Modifier
-            .background(Color(0xFF21262D), RoundedCornerShape(6.dp))
+            .background(Color(0xFF18191E), RoundedCornerShape(6.dp))
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(

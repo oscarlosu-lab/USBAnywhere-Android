@@ -51,7 +51,7 @@ flowchart LR
 
     subgraph Network ["🌐 Low-Latency Network (LAN / Tailscale VPN)"]
         direction TB
-        NET["TCP Port 3240 (USB/IP)<br>HTTP Port 3242 (Sunshine Webhook)<br>mDNS Discovery (_usbanywhere._tcp.)"]
+        NET["TCP Port 3240 (USB/IP)<br>HTTP Port 3242 (Sunshine Webhook)<br>mDNS Discovery (_usbanywhere._tcp)"]
     end
 
     subgraph GamingPC ["🖥️ Gaming Room / Cloud Host"]
@@ -145,7 +145,7 @@ The user interface is built on **Jetpack Compose Material 3** with native 10-foo
 | Tab | Icon | Purpose |
 |---|:---:|---|
 | **Server** | 🔌 | One-tap rootless USB/IP server start/stop, real-time USB-OTG peripheral discovery, and connection status hero card. |
-| **Client** | 💻 | Auto-discovery of remote USB/IP servers via mDNS & UDP 3241, manual host IP connection, and connection guide. |
+| **Client** | 💻 | Multi-tier auto-discovery of remote USB/IP servers (Parallel TCP 3240 subnet scan, UDP 3241 probe & mDNS), manual host IP connection, and connection guide. |
 | **Gamepad** | 🎮 | Live polling rate monitor in Hz, jitter ($\sigma$ in ms), 1000/8000 Hz simulator, Sunshine auto-handoff, and multiplayer slot locks. |
 | **Settings** | ⚙️ | Esports low-latency tuning (`TCP_NODELAY`, ring buffers), opt-in auto-start on boot/USB, TV kiosk mode, and port configuration (:3240, :3242). |
 

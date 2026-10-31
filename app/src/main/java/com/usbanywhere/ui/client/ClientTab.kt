@@ -97,7 +97,7 @@ fun ClientTab(viewModel: ClientViewModel) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF13233A), RoundedCornerShape(10.dp))
+                        .background(Color(0xFF18191E), RoundedCornerShape(10.dp))
                         .padding(12.dp)
                 ) {
                     Text(
@@ -191,7 +191,7 @@ fun ClientTab(viewModel: ClientViewModel) {
                     Button(
                         onClick = { viewModel.scanNetwork() },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF21262D),
+                            containerColor = Color(0xFF18191E),
                             contentColor = NeonCyan
                         ),
                         shape = RoundedCornerShape(10.dp),
@@ -278,7 +278,7 @@ fun ClientTab(viewModel: ClientViewModel) {
                         Box(
                             modifier = Modifier
                                 .background(
-                                    if (isSelected) chipColor.copy(alpha = 0.25f) else Color(0xFF1B222D),
+                                    if (isSelected) chipColor.copy(alpha = 0.25f) else Color(0xFF18191E),
                                     RoundedCornerShape(8.dp)
                                 )
                                 .border(
@@ -320,7 +320,7 @@ fun AttachedDeviceBanner(
     onDisconnect: () -> Unit
 ) {
     val isReconnecting = tunnelState == TunnelState.RECONNECTING
-    val bannerBg = if (isReconnecting) Color(0xFF2E2005) else Color(0xFF0E2A18)
+    val bannerBg = if (isReconnecting) Color(0xFF2E2005) else Color(0xFF16181B)
     val borderColor = if (isReconnecting) Color(0xFFFFB300) else NeonGreen
     val statusColor = if (isReconnecting) Color(0xFFFFB300) else NeonGreen
 
@@ -413,7 +413,7 @@ fun DiscoveredServerCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) Color(0xFF1B2A3F) else SurfaceDark
+            containerColor = if (isSelected) Color(0xFF18191E) else SurfaceDark
         ),
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
@@ -461,7 +461,7 @@ fun DiscoveredServerCard(
             Button(
                 onClick = onSelect,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isSelected) NeonCyan else Color(0xFF21262D),
+                    containerColor = if (isSelected) NeonCyan else Color(0xFF18191E),
                     contentColor = if (isSelected) Color.Black else Color.White
                 ),
                 shape = RoundedCornerShape(8.dp)
@@ -517,9 +517,9 @@ fun RemoteDeviceCard(
                     onClick = onAttach,
                     enabled = !isAttached,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isAttached) Color(0xFF21262D) else NeonGreen,
+                        containerColor = if (isAttached) Color(0xFF18191E) else NeonGreen,
                         contentColor = if (isAttached) Color.LightGray else Color.Black,
-                        disabledContainerColor = Color(0xFF21262D),
+                        disabledContainerColor = Color(0xFF18191E),
                         disabledContentColor = Color.LightGray
                     ),
                     shape = RoundedCornerShape(8.dp),
