@@ -171,7 +171,7 @@ fun ClientTab(viewModel: ClientViewModel) {
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = ElectricBlue,
-                                contentColor = Color.White,
+                                contentColor = Color.Black,
                                 disabledContainerColor = Color(0xFF1E2836),
                                 disabledContentColor = Color(0xFF64748B)
                             ),
@@ -179,7 +179,7 @@ fun ClientTab(viewModel: ClientViewModel) {
                             enabled = !isConnecting && manualIp.isNotBlank()
                         ) {
                             if (isConnecting) {
-                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(16.dp))
+                                CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(16.dp))
                             } else {
                                 Text("Connect", fontWeight = FontWeight.Bold)
                             }

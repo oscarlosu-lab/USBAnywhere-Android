@@ -16,8 +16,10 @@ class ServerViewModel(application: Application) : AndroidViewModel(application) 
 
     val serverStats: StateFlow<ServerRuntimeStats> = UsbIpServerService.serverStats
 
+    private val fallbackHostManager by lazy { UsbHostManager(getApplication()) }
+
     private val hostManager: UsbHostManager
-        get() = UsbIpServerService.hostManagerInstance ?: UsbHostManager(getApplication())
+        get() = UsbIpServerService.hostManagerInstance ?: fallbackHostManager
 
     val connectedDevices: StateFlow<List<UsbExportedDevice>>
         get() = hostManager.connectedDevices
@@ -58,8 +60,7 @@ class ServerViewModel(application: Application) : AndroidViewModel(application) 
         val list = connectedDevices.value
         val dev = list.find { it.busId == busId }
         dev?.let {
-            it.isShared = !it.isShared
-            hostManager.refreshDevices()
+            hostManager.setDeviceShared(busId, !it.isShared)
         }
     }
 }

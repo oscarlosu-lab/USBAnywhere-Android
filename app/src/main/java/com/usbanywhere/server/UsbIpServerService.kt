@@ -80,6 +80,8 @@ class UsbIpServerService : Service() {
     private var statsJob: Job? = null
     private var udpResponderJob: Job? = null
     private var udpResponderSocket: DatagramSocket? = null
+    private var tcpControlJob: Job? = null
+    private var tcpControlSocket: ServerSocket? = null
 
     private var nsdManager: NsdManager? = null
     private var registrationListener: NsdManager.RegistrationListener? = null
@@ -212,9 +214,10 @@ class UsbIpServerService : Service() {
                 )
                 Log.i(TAG, "USBAnywhere USB/IP Server started on $localIp:$port")
 
-                // Start mDNS and UDP discovery responders in parallel
+                // Start mDNS, UDP discovery, and TCP 3241 control responders in parallel
                 registerNsdService(port)
                 startUdpResponder()
+                startTcpControlResponder()
                 startStatsMonitor(localIp)
 
                 while (isActive && !socket.isClosed) {
@@ -333,6 +336,74 @@ class UsbIpServerService : Service() {
             udpResponderSocket?.close()
         } catch (_: Exception) {}
         udpResponderSocket = null
+        tcpControlJob?.cancel()
+        try {
+            tcpControlSocket?.close()
+        } catch (_: Exception) {}
+        tcpControlSocket = null
+    }
+
+    private fun startTcpControlResponder() {
+        tcpControlJob?.cancel()
+        tcpControlJob = serviceScope.launch {
+            try {
+                val ctrlSocket = ServerSocket(DISCOVERY_PORT)
+                tcpControlSocket = ctrlSocket
+                while (isActive && !ctrlSocket.isClosed) {
+                    val client = try { ctrlSocket.accept() } catch (_: Exception) { break }
+                    launch {
+                        try {
+                            client.soTimeout = 2500
+                            val line = client.getInputStream().bufferedReader(Charsets.UTF_8).readLine()?.trim() ?: ""
+                            val parts = line.split(" ", limit = 2)
+                            val cmd = parts.firstOrNull()?.uppercase() ?: ""
+                            val arg = parts.getOrNull(1)?.trim() ?: ""
+                            val hm = hostManagerInstance ?: UsbHostManager(applicationContext)
+                            val response = when (cmd) {
+                                "LIST" -> {
+                                    val arr = org.json.JSONArray()
+                                    for (d in hm.connectedDevices.value) {
+                                        val obj = org.json.JSONObject()
+                                        obj.put("busid", d.busId)
+                                        obj.put("vid", d.vendorHex.lowercase())
+                                        obj.put("pid", d.productHex.lowercase())
+                                        obj.put("description", d.friendlyName)
+                                        obj.put("shared", d.isShared)
+                                        obj.put("attached", d.isAttached)
+                                        arr.put(obj)
+                                    }
+                                    org.json.JSONObject().put("devices", arr).toString()
+                                }
+                                "BIND" -> {
+                                    hm.setDeviceShared(arg, true)
+                                    org.json.JSONObject().put("status", "OK").put("busid", arg).toString()
+                                }
+                                "UNBIND" -> {
+                                    hm.setDeviceShared(arg, false)
+                                    org.json.JSONObject().put("status", "OK").put("busid", arg).toString()
+                                }
+                                "STATUS" -> {
+                                    org.json.JSONObject()
+                                        .put("status", "OK")
+                                        .put("version", "3.2.0")
+                                        .put("platform", "android")
+                                        .toString()
+                                }
+                                else -> org.json.JSONObject().put("status", "ERROR").put("message", "Unknown command").toString()
+                            }
+                            val out = client.getOutputStream()
+                            out.write((response + "\n").toByteArray(Charsets.UTF_8))
+                            out.flush()
+                        } catch (_: Exception) {
+                        } finally {
+                            try { client.close() } catch (_: Exception) {}
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "TCP 3241 control socket could not bind: ${e.message}")
+            }
+        }
     }
 
     private fun startStatsMonitor(ip: String) {

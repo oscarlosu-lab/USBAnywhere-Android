@@ -182,7 +182,7 @@ fun PollingRateHeroCard(
                         onClick = onToggleSim,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (isSimulating) AccentError else ElectricBlue,
-                            contentColor = Color.White
+                            contentColor = if (isSimulating) Color.White else Color.Black
                         ),
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),

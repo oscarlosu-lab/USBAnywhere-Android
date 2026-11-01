@@ -450,7 +450,7 @@ fun SettingsTab(viewModel: SettingsViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "USBAnywhere Android v3.0 • Open Source",
+                    text = "USBAnywhere Android v3.2.0 • Open Source",
                     color = Color.Gray,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
@@ -784,7 +784,7 @@ fun UsbAudioBridgeCard() {
                             label = { Text(text = "${profile.ms}ms", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = ElectricBlue,
-                                selectedLabelColor = Color.White
+                                selectedLabelColor = Color.Black
                             )
                         )
                     }

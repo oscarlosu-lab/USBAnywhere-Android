@@ -78,9 +78,11 @@ class UsbDiscovery(private val context: Context) {
                         if (parts.size == 4) {
                             val b1 = parts[0].toIntOrNull() ?: continue
                             // Private IPv4 LAN subnets: 10.x.x.x, 172.16-31.x.x, 192.168.x.x
+                            val b2 = parts[1].toIntOrNull() ?: 0
                             val isPrivate = (b1 == 10) ||
-                                    (b1 == 172 && (parts[1].toIntOrNull() ?: 0) in 16..31) ||
-                                    (b1 == 192 && parts[1] == "168")
+                                    (b1 == 172 && b2 in 16..31) ||
+                                    (b1 == 192 && parts[1] == "168") ||
+                                    (b1 == 100 && b2 in 64..127)
                             if (isPrivate) {
                                 val subnetBase = "${parts[0]}.${parts[1]}.${parts[2]}"
                                 targets.add(SubnetTarget(subnetBase, hostIp, ia.broadcast))
@@ -106,7 +108,14 @@ class UsbDiscovery(private val context: Context) {
                         targetIp
                     }
                 } catch (_: Exception) {
-                    null
+                    try {
+                        Socket().use { s2 ->
+                            s2.connect(InetSocketAddress(targetIp, DISCOVERY_PORT), timeoutMs)
+                            targetIp
+                        }
+                    } catch (_: Exception) {
+                        null
+                    }
                 }
             }
         }.filterNotNull()

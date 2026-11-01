@@ -191,7 +191,7 @@ fun ServerStatusHeroCard(
                     onClick = onToggle,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (stats.isRunning) AccentError else NeonGreen,
-                        contentColor = Color.Black
+                        contentColor = if (stats.isRunning) Color.White else Color.Black
                     ),
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),

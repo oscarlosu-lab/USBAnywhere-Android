@@ -26,7 +26,7 @@ val DeepDarkBg = ObsidianBg
 val SurfaceDark = ObsidianSurface
 val CardBorder = ObsidianBorder
 val NeonGreen = PhosphorLime
-val NeonCyan = TextHardware
+val NeonCyan = Color(0xFF00E5FF)
 val ElectricBlue = PhosphorLime
 
 val Purple80 = PhosphorLime

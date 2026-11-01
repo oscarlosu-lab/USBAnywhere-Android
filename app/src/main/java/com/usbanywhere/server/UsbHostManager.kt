@@ -35,6 +35,7 @@ class UsbHostManager(private val context: Context) {
 
     private val activeConnections = ConcurrentHashMap<String, UsbDeviceConnection>()
     private val claimedInterfaces = ConcurrentHashMap<String, MutableList<UsbInterface>>()
+    private val sharedStates = ConcurrentHashMap<String, Boolean>()
 
     private val usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -124,7 +125,8 @@ class UsbHostManager(private val context: Context) {
                     interfaces = interfaces,
                     productName = prodName,
                     manufacturerName = mfgName,
-                    isShared = true
+                    isShared = sharedStates.getOrDefault(busId, true),
+                    isAttached = activeConnections.containsKey(busId)
                 )
             )
             busIndex++
@@ -157,6 +159,14 @@ class UsbHostManager(private val context: Context) {
     fun hasPermission(busId: String): Boolean {
         val rawDev = findNativeDevice(busId) ?: return false
         return usbManager.hasPermission(rawDev)
+    }
+
+    fun setDeviceShared(busId: String, shared: Boolean) {
+        sharedStates[busId] = shared
+        if (!shared) {
+            closeDevice(busId)
+        }
+        refreshDevices()
     }
 
     fun findNativeDevice(busId: String): UsbDevice? {

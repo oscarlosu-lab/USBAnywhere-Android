@@ -29,7 +29,11 @@ class UsbIpClient {
         private const val TAG = "UsbIpClient"
         private const val CONNECT_TIMEOUT_MS = 3000
         private const val READ_TIMEOUT_MS = 5000
+        private const val DYNAMIC_CONTROL_PORT = 3241
     }
+
+    var lastError: String? = null
+        private set
 
     private var activeSocket: Socket? = null
     private var attachedBusId: String? = null
@@ -71,24 +75,112 @@ class UsbIpClient {
                 val opcode = input.readShort()
                 val status = input.readInt()
 
-                if (version.toInt() == UsbIpConstants.USBIP_VERSION &&
+                val exported = if (version.toInt() == UsbIpConstants.USBIP_VERSION &&
                     opcode == UsbIpConstants.OP_REP_DEVLIST &&
                     status == UsbIpConstants.USBIP_STATUS_OK
                 ) {
                     val devices = UsbIpPackets.readRepDevlist(input)
                     Log.i(TAG, "Retrieved ${devices.size} devices from $host:$port")
-                    devices
+                    devices.toMutableList()
                 } else {
                     Log.w(TAG, "Invalid response from $host: ver=$version, op=$opcode, status=$status")
-                    emptyList()
+                    mutableListOf()
                 }
+                val dynamicDevs = queryDynamicInventory(host)
+                for (dyn in dynamicDevs) {
+                    if (exported.none { it.busId == dyn.busId }) {
+                        exported.add(dyn)
+                    }
+                }
+                exported
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to list devices from $host:$port: ${e.message}")
-                emptyList()
+                queryDynamicInventory(host)
             } finally {
                 try { socket.close() } catch (_: Exception) {}
             }
         }
+
+    private fun queryDynamicInventory(host: String): List<UsbExportedDevice> {
+        val result = mutableListOf<UsbExportedDevice>()
+        val sock = Socket()
+        try {
+            sock.tcpNoDelay = true
+            sock.connect(InetSocketAddress(host, DYNAMIC_CONTROL_PORT), 1200)
+            sock.soTimeout = 1500
+            val out = sock.getOutputStream()
+            out.write("LIST\n".toByteArray(Charsets.UTF_8))
+            out.flush()
+            val jsonStr = sock.getInputStream().bufferedReader(Charsets.UTF_8).readText().trim()
+            if (jsonStr.isNotEmpty()) {
+                val root = org.json.JSONObject(jsonStr)
+                val arr = root.optJSONArray("devices")
+                if (arr != null) {
+                    for (i in 0 until arr.length()) {
+                        val obj = arr.getJSONObject(i)
+                        val busId = obj.optString("busid", "")
+                        if (busId.isBlank()) continue
+                        val vid = obj.optString("vid", "0000").toIntOrNull(16) ?: 0
+                        val pid = obj.optString("pid", "0000").toIntOrNull(16) ?: 0
+                        val desc = obj.optString("description", "USB Device")
+                        val shared = obj.optBoolean("shared", false)
+                        val busNum = busId.substringBefore("-", "1").toIntOrNull() ?: 1
+                        result.add(
+                            UsbExportedDevice(
+                                busId = busId,
+                                path = "/sys/bus/usb/devices/$busId",
+                                busNum = busNum,
+                                devNum = i + 1,
+                                speed = 3,
+                                vendorId = vid,
+                                productId = pid,
+                                deviceClass = 0,
+                                deviceSubclass = 0,
+                                deviceProtocol = 0,
+                                interfaces = emptyList(),
+                                productName = desc,
+                                isShared = shared
+                            )
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "Dynamic inventory query on $host:$DYNAMIC_CONTROL_PORT skipped: ${e.message}")
+        } finally {
+            try { sock.close() } catch (_: Exception) {}
+        }
+        return result
+    }
+
+    private fun tryDynamicBind(host: String, busId: String): Boolean {
+        val sock = Socket()
+        try {
+            sock.tcpNoDelay = true
+            sock.connect(InetSocketAddress(host, DYNAMIC_CONTROL_PORT), 1500)
+            sock.soTimeout = 2500
+            val out = sock.getOutputStream()
+            out.write("BIND $busId\n".toByteArray(Charsets.UTF_8))
+            out.flush()
+            val resp = sock.getInputStream().bufferedReader(Charsets.UTF_8).readLine()?.trim() ?: ""
+            if (resp.contains("\"DENIED\"", ignoreCase = true)) {
+                lastError = try {
+                    org.json.JSONObject(resp).optString("message", "Denied by host policy")
+                } catch (_: Exception) {
+                    "Denied by host policy"
+                }
+                return false
+            }
+            if (resp.contains("\"OK\"", ignoreCase = true)) {
+                Thread.sleep(150)
+            }
+        } catch (_: Exception) {
+            // Legacy server without TCP 3241
+        } finally {
+            try { sock.close() } catch (_: Exception) {}
+        }
+        return true
+    }
 
     /**
      * Attaches a remote USB device using OP_REQ_IMPORT.
@@ -101,8 +193,14 @@ class UsbIpClient {
         onUnexpectedDisconnect: () -> Unit
     ): Boolean = withContext(Dispatchers.IO) {
         disconnect()
+        lastError = null
         isExplicitDisconnect.set(false)
         _tunnelState.value = TunnelState.CONNECTING
+
+        if (!tryDynamicBind(host, busId)) {
+            _tunnelState.value = TunnelState.DISCONNECTED
+            return@withContext false
+        }
 
         val socket = Socket()
         try {

@@ -141,7 +141,7 @@ class ClientViewModel(application: Application) : AndroidViewModel(application) 
 
         viewModelScope.launch {
             _statusMessage.value = "Attaching remote device $busId..."
-            client.attachRemoteDevice(
+            val ok = client.attachRemoteDevice(
                 host = server.ipAddress,
                 port = server.port,
                 busId = busId,
@@ -153,6 +153,9 @@ class ClientViewModel(application: Application) : AndroidViewModel(application) 
                     triggerAutoReconnect(immediate = false)
                 }
             )
+            if (!ok) {
+                _statusMessage.value = client.lastError ?: "Failed to attach remote device $busId."
+            }
         }
     }
 
