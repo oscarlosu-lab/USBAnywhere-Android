@@ -109,8 +109,8 @@ class SunshineHandoffServer(
             }
 
             when {
-                // Sunshine DO Command hook: /api/stream/start
-                (method == "POST" || method == "GET") && path == "/api/stream/start" -> {
+                // Sunshine DO Command hook: /api/stream/start (POST only for state mutation)
+                method == "POST" && path == "/api/stream/start" -> {
                     SunshineHandoffManager.setMode(HandoffMode.STREAMING_PC)
                     onModeChanged(HandoffMode.STREAMING_PC)
                     sendResponse(
@@ -119,8 +119,8 @@ class SunshineHandoffServer(
                     )
                 }
 
-                // Sunshine UNDO Command hook: /api/stream/stop
-                (method == "POST" || method == "GET") && path == "/api/stream/stop" -> {
+                // Sunshine UNDO Command hook: /api/stream/stop (POST only for state mutation)
+                method == "POST" && path == "/api/stream/stop" -> {
                     SunshineHandoffManager.setMode(HandoffMode.LOCAL_ANDROID_TV)
                     onModeChanged(HandoffMode.LOCAL_ANDROID_TV)
                     sendResponse(
@@ -129,8 +129,8 @@ class SunshineHandoffServer(
                     )
                 }
 
-                // Quick Toggle endpoint
-                (method == "POST" || method == "GET") && path == "/api/toggle" -> {
+                // Quick Toggle endpoint (POST only)
+                method == "POST" && path == "/api/toggle" -> {
                     val newMode = SunshineHandoffManager.toggleMode()
                     onModeChanged(newMode)
                     sendResponse(
@@ -139,8 +139,8 @@ class SunshineHandoffServer(
                     )
                 }
 
-                // Status query
-                method == "GET" && path == "/api/status" -> {
+                // Status query (accepts GET or POST for script compatibility)
+                (method == "GET" || method == "POST") && path == "/api/status" -> {
                     val currentMode = SunshineHandoffManager.currentMode.value
                     val quickToggle = "HOLD_GUIDE_SELECT_2.5S"
                     val json = "{\"status\":\"ok\",\"mode\":\"${currentMode.name}\",\"title\":\"${currentMode.title}\",\"quickToggleCombo\":\"$quickToggle\",\"port\":$port}"
@@ -168,7 +168,8 @@ class SunshineHandoffServer(
                 }
 
                 else -> {
-                    sendResponse(output, 404, "Not Found", "{\"error\":\"Endpoint not found\",\"path\":\"$path\"}")
+                    val safePath = path.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "").replace("\r", "")
+                    sendResponse(output, 404, "Not Found", "{\"error\":\"Endpoint not found\",\"path\":\"$safePath\"}")
                 }
             }
         } catch (e: Exception) {

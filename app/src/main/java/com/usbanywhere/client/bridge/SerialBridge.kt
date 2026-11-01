@@ -36,7 +36,7 @@ class SerialBridge(
 
         bridgeJob = scope.launch {
             try {
-                val server = ServerSocket(bridgePort)
+                val server = ServerSocket(bridgePort, 50, java.net.InetAddress.getByName("127.0.0.1"))
                 serverSocket = server
                 Log.i(TAG, "Serial Bridge listening on 127.0.0.1:$bridgePort")
 

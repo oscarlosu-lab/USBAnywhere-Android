@@ -18,12 +18,19 @@ android {
     signingConfigs {
         create("release") {
             val keystoreFile = file("release.keystore")
-            if (keystoreFile.exists()) {
+            val envStorePassword = System.getenv("KEYSTORE_PASSWORD")
+            val envKeyAlias = System.getenv("KEY_ALIAS")
+            val envKeyPassword = System.getenv("KEY_PASSWORD")
+            if (keystoreFile.exists() &&
+                !envStorePassword.isNullOrBlank() &&
+                !envKeyAlias.isNullOrBlank() &&
+                !envKeyPassword.isNullOrBlank()
+            ) {
                 storeFile = keystoreFile
-                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "usbanywhere_secure_store_2026"
-                keyAlias = System.getenv("KEY_ALIAS") ?: "usbanywhere_release"
-                keyPassword = System.getenv("KEY_PASSWORD") ?: "usbanywhere_secure_store_2026"
-                enableV1Signing = true
+                storePassword = envStorePassword
+                keyAlias = envKeyAlias
+                keyPassword = envKeyPassword
+                enableV1Signing = false
                 enableV2Signing = true
                 enableV3Signing = true
                 enableV4Signing = true

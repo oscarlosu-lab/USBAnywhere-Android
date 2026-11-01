@@ -120,6 +120,10 @@ class UsbIpServerWorker(
                         val endpoint = input.readInt()
                         val transferFlags = input.readInt()
                         val bufferLength = input.readInt()
+                        if (bufferLength !in 0..(1024 * 1024)) {
+                            Log.w(TAG, "URB submit rejected: bufferLength $bufferLength exceeds 1MB limit")
+                            break
+                        }
                         val startFrame = input.readInt()
                         val numPackets = input.readInt()
                         val interval = input.readInt()

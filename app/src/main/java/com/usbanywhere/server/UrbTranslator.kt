@@ -44,7 +44,7 @@ class UrbTranslator(
         val wIndex = (setup[4].toInt() and 0xFF) or ((setup[5].toInt() and 0xFF) shl 8)
         val wLength = (setup[6].toInt() and 0xFF) or ((setup[7].toInt() and 0xFF) shl 8)
 
-        val targetLength = maxOf(wLength, cmd.transferBufferLength)
+        val targetLength = maxOf(wLength, cmd.transferBufferLength).coerceIn(0, 1024 * 1024)
 
         return if (cmd.direction == UsbIpConstants.USBIP_DIR_OUT) {
             val payload = outPayload ?: ByteArray(0)
@@ -111,7 +111,8 @@ class UrbTranslator(
             }
         } else {
             // Direction IN (Device -> Host)
-            val buffer = ByteArray(cmd.transferBufferLength)
+            val bufferLength = cmd.transferBufferLength.coerceIn(0, 1024 * 1024)
+            val buffer = ByteArray(bufferLength)
             val transferred = connection.bulkTransfer(
                 endpoint,
                 buffer,
