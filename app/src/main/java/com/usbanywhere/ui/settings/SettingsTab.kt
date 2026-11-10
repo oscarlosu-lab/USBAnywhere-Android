@@ -1,5 +1,7 @@
 package com.usbanywhere.ui.settings
 
+import com.usbanywhere.ui.components.TvSwitch
+import com.usbanywhere.ui.components.tvFocusRing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.border
@@ -404,7 +407,7 @@ fun SettingsTab(viewModel: SettingsViewModel) {
                     )
                 }
 
-                IconButton(onClick = { viewModel.clearLogs() }) {
+                IconButton(onClick = { viewModel.clearLogs() }, modifier = Modifier.tvFocusRing(CircleShape)) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Clear",
@@ -450,7 +453,7 @@ fun SettingsTab(viewModel: SettingsViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "USBAnywhere Android v3.2.0 • Open Source",
+                    text = "USBAnywhere Android v1.0.0 • Open Source",
                     color = Color.Gray,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
@@ -526,7 +529,7 @@ fun SettingToggleRow(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        Switch(
+        TvSwitch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
@@ -599,7 +602,7 @@ fun PortSettingRow(
             }
             if (port != defaultPort) {
                 Spacer(modifier = Modifier.width(6.dp))
-                IconButton(onClick = onReset, modifier = Modifier.size(28.dp)) {
+                IconButton(onClick = onReset, modifier = Modifier.size(28.dp).tvFocusRing(CircleShape)) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = "Reset port",
@@ -664,7 +667,7 @@ fun WanMeshCard() {
                     }
                 }
 
-                IconButton(onClick = { WanInterfaceDetector.refresh() }) {
+                IconButton(onClick = { WanInterfaceDetector.refresh() }, modifier = Modifier.tvFocusRing(CircleShape)) {
                     Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh", tint = Color.Gray, modifier = Modifier.size(18.dp))
                 }
             }
@@ -702,7 +705,8 @@ fun WanMeshCard() {
                 Button(
                     onClick = { showQr = !showQr },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B)),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.tvFocusRing(RoundedCornerShape(8.dp))
                 ) {
                     Icon(imageVector = Icons.Default.QrCode2, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
@@ -765,7 +769,7 @@ fun UsbAudioBridgeCard() {
                     }
                 }
 
-                Switch(
+                TvSwitch(
                     checked = isEnabled,
                     onCheckedChange = { UsbAudioBridge.setEnabled(it) },
                     colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = NeonGreen)
@@ -781,6 +785,7 @@ fun UsbAudioBridgeCard() {
                         FilterChip(
                             selected = latency == profile,
                             onClick = { UsbAudioBridge.setLatencyProfile(profile) },
+                            modifier = Modifier.tvFocusRing(RoundedCornerShape(8.dp)),
                             label = { Text(text = "${profile.ms}ms", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = ElectricBlue,

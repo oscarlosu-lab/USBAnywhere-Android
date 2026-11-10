@@ -22,7 +22,17 @@ object UsbIpConstants {
 
     // Return Status Codes
     const val USBIP_STATUS_OK = 0
-    const val USBIP_STATUS_ERROR = 1
+    const val USBIP_STATUS_ERROR = 1 // OP_REP_* management replies only
+
+    // URB status codes are negative Linux errno values (what usbip clients expect)
+    const val ENOENT = -2
+    const val EXDEV = -18
+    const val ENODEV = -19
+    const val EPIPE = -32
+    const val EPROTO = -71
+    const val ECONNRESET = -104
+    const val ESHUTDOWN = -108
+    const val ETIMEDOUT = -110
 
     // Speeds
     const val USB_SPEED_UNKNOWN = 0

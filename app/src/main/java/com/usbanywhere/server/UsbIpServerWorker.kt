@@ -4,7 +4,6 @@ import android.hardware.usb.UsbDeviceConnection
 import android.util.Log
 import com.usbanywhere.protocol.UsbIpConstants
 import com.usbanywhere.protocol.UsbIpPackets
-import com.usbanywhere.protocol.UsbIpUrb
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.DataInputStream
@@ -22,6 +21,7 @@ class UsbIpServerWorker(
 
     companion object {
         private const val TAG = "UsbIpServerWorker"
+        private const val MAX_ISO_PACKETS = 1024
     }
 
     @Volatile
@@ -63,13 +63,15 @@ class UsbIpServerWorker(
                             val busId = UsbIpPackets.readFixedString(input, UsbIpConstants.SYSFS_BUSID_SIZE)
                             Log.i(TAG, "Client ${socket.inetAddress} requested attach of device $busId")
 
-                            val conn = hostManager.openDevice(busId)
                             val dev = hostManager.connectedDevices.value.find { it.busId == busId }
+                            // Enforce export policy: only devices explicitly shared may be imported
+                            val conn = if (dev != null && dev.isShared) hostManager.openDevice(busId) else null
 
                             if (conn != null && dev != null) {
                                 attachedBusId = busId
                                 dev.isAttached = true
-                                UsbIpPackets.writeRepImport(output, UsbIpConstants.USBIP_STATUS_OK, dev)
+                                val refined = hostManager.refineDevice(busId, conn) ?: dev
+                                UsbIpPackets.writeRepImport(output, UsbIpConstants.USBIP_STATUS_OK, refined)
                                 Log.i(TAG, "Device $busId attached successfully, entering streaming loop")
                                 streamUrbs(input, output, busId, conn)
                                 break // Streaming finished or disconnected
@@ -100,7 +102,14 @@ class UsbIpServerWorker(
         busId: String,
         connection: UsbDeviceConnection
     ) {
-        val translator = UrbTranslator(hostManager)
+        val session = UrbSession(
+            busId = busId,
+            connection = connection,
+            hostManager = hostManager,
+            output = output,
+            onPacketTransferred = onPacketTransferred,
+            onFatal = { try { socket.close() } catch (_: Exception) {} }
+        )
 
         try {
             while (isRunning && !socket.isClosed) {
@@ -150,47 +159,25 @@ class UsbIpServerWorker(
                             input.readFully(outPayload)
                         }
 
-                        val result = translator.executeUrb(busId, connection, cmd, outPayload)
-
-                        UsbIpUrb.writeRetSubmit(
-                            output = output,
-                            seqNum = seqNum,
-                            devId = devId,
-                            direction = direction,
-                            endpoint = endpoint,
-                            status = result.status,
-                            actualLength = result.actualLength,
-                            startFrame = startFrame,
-                            numberOfPackets = numPackets,
-                            errorCount = 0,
-                            setup = setup,
-                            data = result.returnData
-                        )
-
-                        val bytes = if (direction == UsbIpConstants.USBIP_DIR_OUT) {
-                            bufferLength.toLong()
-                        } else {
-                            result.actualLength.toLong()
+                        // ISO URBs carry an iso_packet_descriptor array after the payload;
+                        // it must be consumed or the stream desynchronizes.
+                        var isoDescriptors: ByteArray? = null
+                        if (numPackets in 1..MAX_ISO_PACKETS) {
+                            isoDescriptors = ByteArray(numPackets * 16)
+                            input.readFully(isoDescriptors)
                         }
-                        onPacketTransferred(1, bytes)
+
+                        session.submit(cmd, outPayload, isoDescriptors)
                     }
                     UsbIpConstants.USBIP_CMD_UNLINK -> {
                         val seqNum = input.readInt()
-                        val devId = input.readInt()
-                        val direction = input.readInt()
-                        val endpoint = input.readInt()
+                        input.readInt() // devid
+                        input.readInt() // direction
+                        input.readInt() // ep
                         val unlinkSeqNum = input.readInt()
                         val padding = ByteArray(24)
                         input.readFully(padding)
-
-                        UsbIpUrb.writeRetUnlink(
-                            output = output,
-                            seqNum = seqNum,
-                            devId = devId,
-                            direction = direction,
-                            endpoint = endpoint,
-                            status = UsbIpConstants.USBIP_STATUS_OK
-                        )
+                        session.unlink(seqNum, unlinkSeqNum)
                     }
                     else -> {
                         Log.w(TAG, "Unknown URB command code: 0x${Integer.toHexString(cmdCode)}")
@@ -200,6 +187,8 @@ class UsbIpServerWorker(
             }
         } catch (e: Exception) {
             Log.d(TAG, "Streaming loop closed: ${e.message}")
+        } finally {
+            session.close()
         }
     }
 

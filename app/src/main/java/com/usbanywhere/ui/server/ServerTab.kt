@@ -1,5 +1,7 @@
 package com.usbanywhere.ui.server
 
+import com.usbanywhere.ui.components.TvSwitch
+import com.usbanywhere.ui.components.tvFocusRing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -68,6 +70,12 @@ fun ServerTab(viewModel: ServerViewModel) {
     val devices by viewModel.connectedDevices.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
+    // Returning from the system USB-permission dialog resumes the activity: re-read state
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+        viewModel.refreshDevices()
+        onPauseOrDispose { }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -109,7 +117,8 @@ fun ServerTab(viewModel: ServerViewModel) {
 
                 IconButton(
                     onClick = { viewModel.refreshDevices() },
-                    enabled = !isRefreshing
+                    enabled = !isRefreshing,
+                    modifier = Modifier.tvFocusRing(CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
@@ -128,7 +137,7 @@ fun ServerTab(viewModel: ServerViewModel) {
             items(devices, key = { it.busId }) { device ->
                 OtgDeviceCard(
                     device = device,
-                    hasPermission = viewModel.hasPermission(device.busId),
+                    hasPermission = device.hasPermission,
                     onRequestPermission = { viewModel.requestPermission(device.busId) },
                     onToggleShare = { viewModel.toggleShare(device.busId) }
                 )
@@ -195,7 +204,9 @@ fun ServerStatusHeroCard(
                     ),
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                    modifier = Modifier.defaultMinSize(minWidth = 105.dp)
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = 105.dp)
+                        .tvFocusRing(RoundedCornerShape(12.dp))
                 ) {
                     Icon(
                         imageVector = if (stats.isRunning) Icons.Default.Stop else Icons.Default.PlayArrow,
@@ -296,7 +307,7 @@ fun OtgDeviceCard(
                     )
                 }
 
-                Switch(
+                TvSwitch(
                     checked = device.isShared,
                     onCheckedChange = { onToggleShare() },
                     colors = SwitchDefaults.colors(
@@ -331,7 +342,9 @@ fun OtgDeviceCard(
                         contentColor = Color.Black
                     ),
                     shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .tvFocusRing(RoundedCornerShape(8.dp), zoom = 1.02f)
                 ) {
                     Icon(imageVector = Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))

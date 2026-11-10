@@ -1,5 +1,6 @@
 package com.usbanywhere.ui.gamepad
 
+import com.usbanywhere.ui.components.tvFocusRing
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
@@ -187,13 +188,7 @@ fun PollingRateHeroCard(
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                         modifier = Modifier
-                            .focusable()
-                            .onFocusChanged { isSimBtnFocused = it.isFocused }
-                            .border(
-                                width = if (isSimBtnFocused) 2.dp else 0.dp,
-                                color = if (isSimBtnFocused) NeonCyan else Color.Transparent,
-                                shape = RoundedCornerShape(8.dp)
-                            )
+                            .tvFocusRing(RoundedCornerShape(8.dp))
                     ) {
                         Icon(
                             imageVector = if (isSimulating) Icons.Default.Stop else Icons.Default.PlayArrow,
@@ -218,13 +213,7 @@ fun PollingRateHeroCard(
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                         modifier = Modifier
-                            .focusable()
-                            .onFocusChanged { isResetBtnFocused = it.isFocused }
-                            .border(
-                                width = if (isResetBtnFocused) 2.dp else 0.dp,
-                                color = if (isResetBtnFocused) NeonCyan else Color.Transparent,
-                                shape = RoundedCornerShape(8.dp)
-                            )
+                            .tvFocusRing(RoundedCornerShape(8.dp))
                     ) {
                         Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
@@ -793,8 +782,7 @@ fun SunshineHandoffCard(
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusable()
-                    .onFocusChanged { isToggleFocused = it.isFocused }
+                    .tvFocusRing(RoundedCornerShape(10.dp), zoom = 1.02f)
                     .border(
                         width = if (isToggleFocused) 2.dp else 1.dp,
                         color = if (isToggleFocused) NeonCyan else CardBorder,

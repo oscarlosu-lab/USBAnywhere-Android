@@ -1,5 +1,6 @@
 package com.usbanywhere.ui.client
 
+import com.usbanywhere.ui.components.tvFocusRing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -176,6 +177,7 @@ fun ClientTab(viewModel: ClientViewModel) {
                                 disabledContentColor = Color(0xFF64748B)
                             ),
                             shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.tvFocusRing(RoundedCornerShape(10.dp)),
                             enabled = !isConnecting && manualIp.isNotBlank()
                         ) {
                             if (isConnecting) {
@@ -195,7 +197,7 @@ fun ClientTab(viewModel: ClientViewModel) {
                             contentColor = NeonCyan
                         ),
                         shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().tvFocusRing(RoundedCornerShape(10.dp), zoom = 1.02f),
                         enabled = !isScanning
                     ) {
                         if (isScanning) {
@@ -286,6 +288,7 @@ fun ClientTab(viewModel: ClientViewModel) {
                                     if (isSelected) chipColor else CardBorder,
                                     RoundedCornerShape(8.dp)
                                 )
+                                .tvFocusRing(RoundedCornerShape(8.dp))
                                 .clickable { selectedFilter = cat }
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
@@ -389,7 +392,8 @@ fun AttachedDeviceBanner(
             Button(
                 onClick = onDisconnect,
                 colors = ButtonDefaults.buttonColors(containerColor = AccentError, contentColor = Color.White),
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.tvFocusRing(RoundedCornerShape(10.dp))
             ) {
                 Icon(imageVector = Icons.Default.LinkOff, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
@@ -464,7 +468,8 @@ fun DiscoveredServerCard(
                     containerColor = if (isSelected) NeonCyan else Color(0xFF18191E),
                     contentColor = if (isSelected) Color.Black else Color.White
                 ),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.tvFocusRing(RoundedCornerShape(8.dp))
             ) {
                 Text(text = if (isSelected) "Selected" else "Inspect", fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
@@ -523,7 +528,8 @@ fun RemoteDeviceCard(
                         disabledContentColor = Color.LightGray
                     ),
                     shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                    modifier = Modifier.tvFocusRing(RoundedCornerShape(8.dp))
                 ) {
                     Icon(imageVector = Icons.Default.Cable, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))

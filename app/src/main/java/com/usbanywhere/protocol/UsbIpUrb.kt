@@ -80,7 +80,8 @@ object UsbIpUrb {
         numberOfPackets: Int,
         errorCount: Int,
         setup: ByteArray?,
-        data: ByteArray?
+        data: ByteArray?,
+        isoDescriptors: ByteArray? = null
     ) {
         output.writeInt(UsbIpConstants.USBIP_RET_SUBMIT)
         output.writeInt(seqNum)
@@ -102,6 +103,10 @@ object UsbIpUrb {
         // If Device -> Host transfer (IN) and length > 0, write received payload
         if (direction == UsbIpConstants.USBIP_DIR_IN && actualLength > 0 && data != null) {
             output.write(data, 0, actualLength)
+        }
+        // ISO transfers: iso_packet_descriptor array (16 bytes each) follows the payload
+        if (isoDescriptors != null && isoDescriptors.isNotEmpty()) {
+            output.write(isoDescriptors)
         }
         output.flush()
     }

@@ -16,13 +16,9 @@ class ServerViewModel(application: Application) : AndroidViewModel(application) 
 
     val serverStats: StateFlow<ServerRuntimeStats> = UsbIpServerService.serverStats
 
-    private val fallbackHostManager by lazy { UsbHostManager(getApplication()) }
+    private val hostManager: UsbHostManager = UsbHostManager.get(application)
 
-    private val hostManager: UsbHostManager
-        get() = UsbIpServerService.hostManagerInstance ?: fallbackHostManager
-
-    val connectedDevices: StateFlow<List<UsbExportedDevice>>
-        get() = hostManager.connectedDevices
+    val connectedDevices: StateFlow<List<UsbExportedDevice>> = hostManager.connectedDevices
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()

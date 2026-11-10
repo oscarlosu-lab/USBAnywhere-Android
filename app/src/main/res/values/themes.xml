@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.USBAnywhere" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Dark window background: the app UI is dark, so the first frames (before Compose
+         draws) must not flash a white screen. -->
+    <style name="Theme.USBAnywhere" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/snake_window_bg</item>
+        <item name="android:colorBackground">@color/snake_window_bg</item>
+        <item name="android:statusBarColor">@color/snake_window_bg</item>
+        <item name="android:navigationBarColor">@color/snake_window_bg</item>
+    </style>
 </resources>

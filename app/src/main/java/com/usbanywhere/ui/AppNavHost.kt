@@ -2,7 +2,6 @@ package com.usbanywhere.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -45,6 +44,8 @@ import com.usbanywhere.theme.NeonCyan
 import com.usbanywhere.theme.NeonGreen
 import com.usbanywhere.theme.SurfaceDark
 import com.usbanywhere.ui.client.ClientTab
+import com.usbanywhere.ui.components.TvFocusHighlight
+import com.usbanywhere.ui.components.tvFocusRing
 import com.usbanywhere.ui.client.ClientViewModel
 import com.usbanywhere.ui.gamepad.GamepadTesterTab
 import com.usbanywhere.ui.server.ServerTab
@@ -70,6 +71,7 @@ fun AppNavHost(
     var selectedTab by remember { mutableIntStateOf(0) }
     var focusedTab by remember { mutableIntStateOf(-1) }
 
+    TvFocusHighlight {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -140,20 +142,15 @@ fun AppNavHost(
                             Text(
                                 text = tab.title,
                                 fontWeight = if (isSelected || isFocused) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isFocused && !isSelected) NeonCyan else Color.Unspecified
+                                color = if (isFocused) Color.White else Color.Unspecified
                             )
                         },
                         modifier = Modifier
-                            .focusable()
                             .onFocusChanged {
-                                if (it.isFocused) focusedTab = index
+                                if (it.isFocused || it.hasFocus) focusedTab = index
                                 else if (focusedTab == index) focusedTab = -1
                             }
-                            .border(
-                                width = if (isFocused) 2.dp else 0.dp,
-                                color = if (isFocused) NeonCyan else Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            ),
+                            .tvFocusRing(RoundedCornerShape(16.dp), zoom = 1.0f),
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = NeonGreen,
                             selectedTextColor = NeonGreen,
@@ -179,5 +176,6 @@ fun AppNavHost(
                 3 -> SettingsTab(viewModel = settingsViewModel)
             }
         }
+    }
     }
 }

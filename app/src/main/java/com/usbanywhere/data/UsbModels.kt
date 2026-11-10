@@ -30,6 +30,7 @@ data class UsbExportedDevice(
     val productName: String = "USB Device",
     val manufacturerName: String = "Generic",
     var isShared: Boolean = true,
+    val hasPermission: Boolean = false,
     var isAttached: Boolean = false,
     var packetsTransferred: Long = 0,
     var bytesTransferred: Long = 0
