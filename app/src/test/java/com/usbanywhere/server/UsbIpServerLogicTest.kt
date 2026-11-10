@@ -81,4 +81,38 @@ class UsbIpServerLogicTest {
         repeat(3) { dis.readInt() }
         assertEquals(-32, dis.readInt())
     }
+
+    @Test
+    fun extractDescriptorFallbackServesDeviceConfigAndHidReportForKeyboard() {
+        // Synthetic USB keyboard rawDescriptors: 18B Device + 9B Config + 9B Interface (HID Boot Keyboard) + 9B HID (report len 63) + 7B Endpoint
+        val raw = byteArrayOf(
+            // Device descriptor (18B)
+            18, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 64, 0x37, 0x38, 0x0D, 0x30, 0x00, 0x01, 1, 2, 0, 1,
+            // Config descriptor (9B, totalLength = 34 = 0x0022)
+            9, 0x02, 34, 0x00, 1, 1, 0, 0xA0.toByte(), 50,
+            // Interface descriptor (9B, iface=0, class=3 HID, subclass=1 Boot, protocol=1 Keyboard)
+            9, 0x04, 0, 0, 1, 0x03, 0x01, 0x01, 0,
+            // HID descriptor (9B, report descriptor length = 63 = 0x003F)
+            9, 0x21, 0x11, 0x01, 0, 1, 0x22, 63, 0x00,
+            // Endpoint descriptor (7B)
+            7, 0x05, 0x81.toByte(), 0x03, 8, 0x00, 10
+        )
+
+        val devDesc = UrbSession.extractDescriptorFallback(raw, 0x80, 0x06, 0x0100, 0, 64)!!
+        assertEquals(18, devDesc.size)
+        assertEquals(0x37, devDesc[8].toInt() and 0xFF)
+        assertEquals(0x38, devDesc[9].toInt() and 0xFF)
+
+        val cfgDesc = UrbSession.extractDescriptorFallback(raw, 0x80, 0x06, 0x0200, 0, 255)!!
+        assertEquals(34, cfgDesc.size)
+
+        val hidDesc = UrbSession.extractDescriptorFallback(raw, 0x81, 0x06, 0x2100, 0, 9)!!
+        assertEquals(9, hidDesc.size)
+        assertEquals(0x21, hidDesc[1].toInt() and 0xFF)
+
+        val repDesc = UrbSession.extractDescriptorFallback(raw, 0x81, 0x06, 0x2200, 0, 63)!!
+        assertEquals(63, repDesc.size)
+        assertEquals(0x05, repDesc[0].toInt() and 0xFF)
+        assertEquals(0xC0, repDesc[62].toInt() and 0xFF)
+    }
 }

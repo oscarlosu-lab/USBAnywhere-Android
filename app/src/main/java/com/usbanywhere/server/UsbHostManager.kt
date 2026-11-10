@@ -225,8 +225,11 @@ class UsbHostManager private constructor(private val context: Context) {
             bcdDevice = (raw[12].toInt() and 0xFF) or ((raw[13].toInt() and 0xFF) shl 8)
             val bcdUsb = (raw[2].toInt() and 0xFF) or ((raw[3].toInt() and 0xFF) shl 8)
             val maxPacket0 = raw[7].toInt() and 0xFF
-            if (speed == UsbIpConstants.USB_SPEED_FULL && bcdUsb >= 0x0200 && maxPacket0 == 64) {
+            val isPureHid = base.deviceClass == UsbConstants.USB_CLASS_HID ||
+                (base.interfaces.isNotEmpty() && base.interfaces.all { it.interfaceClass == UsbConstants.USB_CLASS_HID })
+            if (speed == UsbIpConstants.USB_SPEED_FULL && bcdUsb >= 0x0200 && maxPacket0 == 64 && !isPureHid) {
                 // Ambiguous FS/HS: a HS-capable device answers DEVICE_QUALIFIER, FS-only devices stall.
+                // Skip on pure HID devices (keyboards/mice/gamepads) whose EP0 can lock up on 0x0600 stalls.
                 val q = ByteArray(10)
                 val n = try { conn.controlTransfer(0x80, 0x06, 0x0600, 0, q, q.size, 1000) } catch (_: Exception) { -1 }
                 if (n >= 10 && q[1].toInt() == 6) speed = UsbIpConstants.USB_SPEED_HIGH

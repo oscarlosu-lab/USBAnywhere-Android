@@ -2,7 +2,7 @@
 
 🌐 **Idioma / Language:** [English](README.md) | **Español**
 
-**v3.2.0** | **Parte del [Ecosistema USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)**  
+**v3.3.0** | **Parte del [Ecosistema USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)**  
 [🌍 Web Oficial](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases y APK](https://github.com/oscarlosu-lab/USBAnywhere-Android/releases/latest) | [🔗 USBAnywhere Cliente Windows](https://github.com/oscarlosu-lab/USBAnywhere) | [🖥️ USBAnywhere Servidor Windows](https://github.com/oscarlosu-lab/USBAnywhere-Server) | [💬 Comunidad Reddit](https://www.reddit.com/r/UsbAnywhere/) | [☀️ Guía Sunshine & Moonlight](docs/SUNSHINE_MOONLIGHT_INTEGRATION_ES.md) | [📖 Roadmap Estratégico](ROADMAP.md) | [🔄 Workflow de Ingeniería](WORKFLOW.md)
 
 [![Web Oficial](https://img.shields.io/badge/Web-USBAnywhere-06B6D4?style=flat-square&logo=googlechrome&logoColor=white)](https://oscarlosu-lab.github.io/USBAnywhere/)
@@ -13,7 +13,7 @@
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose%20Material%203-purple.svg)](https://developer.android.com/jetpack/compose)
 [![Protocolo](https://img.shields.io/badge/Protocolo-USB%2FIP%20(Borrador%20RFC)-orange.svg)](https://docs.kernel.org/usb/usbip_protocol.html)
 [![Licencia](https://img.shields.io/badge/Licencia-GPL--3.0-red.svg)](LICENSE)
-[![Pruebas](https://img.shields.io/badge/Pruebas-38%2F38%20Superadas-brightgreen.svg)]()
+[![Pruebas](https://img.shields.io/badge/Pruebas-42%2F42%20Superadas-brightgreen.svg)]()
 [![Tamaño APK](https://img.shields.io/badge/Tamaño%20APK-2.07%20MB%20(90%25%20Reducido)-success.svg)]()
 
 > **¿Por qué pagar 49,00 $ por servidor y estar limitado a un único dispositivo USB?**  

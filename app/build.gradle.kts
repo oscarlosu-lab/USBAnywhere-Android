@@ -11,8 +11,8 @@ android {
         applicationId = "com.usbanywhere"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "3.2.0"
+        versionCode = 4
+        versionName = "3.3.0"
     }
 
     signingConfigs {
