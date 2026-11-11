@@ -1,8 +1,8 @@
 # 🗺️ USBAnywhere Android — Strategic Technical Roadmap
 
-> **Target Version**: v1.0.1 Stable (Dual-Mode USB/IP Engine)  
-> **Orientation**: Community-driven (incorporating insights from r/MoonlightStreaming, r/cloudygamer, r/simracing, and r/selfhosted)  
-> **Status**: Live & Published (v1.0.1 on GitHub & Community Triad)
+> **Target Version**: v3.3.0 Stable (Dual-Mode USB/IP Engine & Android TV Suite)  
+> **Orientation**: Community-driven (incorporating insights from r/UsbAnywhere, r/MoonlightStreaming, r/cloudygamer, r/simracing, and r/selfhosted)  
+> **Status**: Live & Published (v3.3.0 on GitHub & Community Triad)
 
 ---
 
