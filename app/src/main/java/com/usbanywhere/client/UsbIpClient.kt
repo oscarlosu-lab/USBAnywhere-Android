@@ -182,6 +182,24 @@ class UsbIpClient {
         return true
     }
 
+    private fun tryDynamicUnbind(host: String, busId: String) {
+        if (host.isBlank() || busId.isBlank()) return
+        val sock = Socket()
+        try {
+            sock.tcpNoDelay = true
+            sock.connect(InetSocketAddress(host, DYNAMIC_CONTROL_PORT), 700)
+            sock.soTimeout = 1500
+            val out = sock.getOutputStream()
+            out.write("UNBIND $busId\n".toByteArray(Charsets.UTF_8))
+            out.flush()
+            sock.getInputStream().bufferedReader(Charsets.UTF_8).readLine()
+        } catch (_: Exception) {
+            // Best-effort instant server release; auto-unbind daemon handles fallback
+        } finally {
+            try { sock.close() } catch (_: Exception) {}
+        }
+    }
+
     /**
      * Attaches a remote USB device using OP_REQ_IMPORT.
      */
@@ -325,6 +343,8 @@ class UsbIpClient {
     }
 
     fun disconnect() {
+        val prevHost = attachedHost
+        val prevBusId = attachedBusId
         isExplicitDisconnect.set(true)
         stopSocketMonitor()
         try {
@@ -332,7 +352,14 @@ class UsbIpClient {
         } catch (_: Exception) {}
         activeSocket = null
         attachedBusId = null
+        attachedHost = null
         _tunnelState.value = TunnelState.DISCONNECTED
+
+        if (!prevHost.isNullOrBlank() && !prevBusId.isNullOrBlank()) {
+            clientScope.launch {
+                tryDynamicUnbind(prevHost, prevBusId)
+            }
+        }
     }
 
     fun isConnected(): Boolean = activeSocket?.isConnected == true && activeSocket?.isClosed == false
