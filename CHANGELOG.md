@@ -1,5 +1,15 @@
 # CHANGELOG - USBAnywhere Android
 
+## [3.3.1] - 2026-11-15
+
+### Fixed
+- **USB Configuration `bInterval` Clamping (`UrbSession.sanitizeConfigDescriptor`)**:
+  - Clamps zero `bInterval` values on Interrupt (`0x03`) and Isochronous (`0x01`) endpoints inside both live EP0 and fallback `0x02` Configuration descriptors to `1` so strict Windows `USBHUB3` host validation enumerates non-compliant USB peripherals cleanly.
+- **USB String Descriptor Fallback Synthesis (`UrbSession.extractDescriptorFallback`)**:
+  - Synthesizes `0x03` String descriptors (`0x0409` en-US LANGID and UTF-16LE Manufacturer, Product, and SerialNumber strings from Android `UsbDevice` metadata) when control IN EP0 `GET_DESCRIPTOR` stalls on hardware keyboards, mice, or hubs.
+
+---
+
 ## [3.3.0] - 2026-11-10
 
 ### Added

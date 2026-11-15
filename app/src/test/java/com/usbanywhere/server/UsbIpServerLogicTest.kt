@@ -115,4 +115,49 @@ class UsbIpServerLogicTest {
         assertEquals(0x05, repDesc[0].toInt() and 0xFF)
         assertEquals(0xC0, repDesc[62].toInt() and 0xFF)
     }
+
+    @Test
+    fun extractDescriptorFallbackServesStringsAndSanitizesZeroInterval() {
+        val rawWithZeroIntvlAndStrings = byteArrayOf(
+            // Device descriptor: iManufacturer=1, iProduct=2, iSerialNumber=3
+            18, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 64, 0x6D, 0x04, 0x2B, 0xC5.toByte(), 0x00, 0x01, 1, 2, 3, 1,
+            // Config descriptor (totalLength = 32 = 9 + 9 + 7 + 7)
+            9, 0x02, 32, 0x00, 1, 1, 0, 0xA0.toByte(), 50,
+            // Interface descriptor (2 endpoints)
+            9, 0x04, 0, 0, 2, 0x03, 0x00, 0x00, 0,
+            // Interrupt endpoint with broken bInterval = 0 -> must clamp to 1
+            7, 0x05, 0x81.toByte(), 0x03, 64, 0x00, 0,
+            // Bulk endpoint with bInterval = 0 -> must remain 0
+            7, 0x05, 0x02, 0x02, 64, 0x00, 0
+        )
+
+        val cfg = UrbSession.extractDescriptorFallback(rawWithZeroIntvlAndStrings, 0x80, 0x06, 0x0200, 0, 255)!!
+        assertEquals(32, cfg.size)
+        // First endpoint offset = 9 + 9 = 18; bInterval offset = 18 + 6 = 24
+        assertEquals(1, cfg[24].toInt() and 0xFF)
+        // Bulk endpoint offset = 18 + 7 = 25; bInterval offset = 25 + 6 = 31 (stays 0)
+        assertEquals(0, cfg[31].toInt() and 0xFF)
+
+        val lang = UrbSession.extractDescriptorFallback(rawWithZeroIntvlAndStrings, 0x80, 0x06, 0x0300, 0, 4)!!
+        assertEquals(4, lang.size)
+        assertEquals(0x03, lang[1].toInt() and 0xFF)
+        assertEquals(0x09, lang[2].toInt() and 0xFF)
+        assertEquals(0x04, lang[3].toInt() and 0xFF)
+
+        val ser = UrbSession.extractDescriptorFallback(
+            rawWithZeroIntvlAndStrings,
+            0x80,
+            0x06,
+            0x0303,
+            0x0409,
+            255,
+            manufacturer = "Vendor",
+            product = "Controller",
+            serialNumber = "SN42"
+        )!!
+        assertEquals(2 + 4 * 2, ser.size)
+        assertEquals(ser.size, ser[0].toInt() and 0xFF)
+        assertEquals(0x03, ser[1].toInt() and 0xFF)
+        assertEquals("SN42", String(ser, 2, ser.size - 2, Charsets.UTF_16LE))
+    }
 }

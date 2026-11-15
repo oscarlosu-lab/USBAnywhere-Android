@@ -100,8 +100,34 @@ class UrbSession(
         ).map { it.toByte() }.toByteArray()
 
         /**
+         * Clamps zero bInterval on Interrupt (0x03) and Isochronous (0x01) endpoints in a
+         * Configuration descriptor bundle to 1 so Windows USBHUB3 validation succeeds.
+         */
+        fun sanitizeConfigDescriptor(raw: ByteArray): ByteArray {
+            if (raw.size < 9 || (raw[1].toInt() and 0xFF) != 0x02) return raw
+            var out: ByteArray? = null
+            var pos = 0
+            while (pos + 2 <= raw.size) {
+                val bLen = raw[pos].toInt() and 0xFF
+                val bType = raw[pos + 1].toInt() and 0xFF
+                if (bLen < 2 || pos + bLen > raw.size) break
+                if (bType == 0x05 && bLen >= 7) { // USB_DT_ENDPOINT
+                    val xferType = raw[pos + 3].toInt() and 0x03
+                    val bInterval = raw[pos + 6].toInt() and 0xFF
+                    if ((xferType == 1 || xferType == 3) && bInterval == 0) {
+                        val copy = out ?: raw.copyOf().also { out = it }
+                        copy[pos + 6] = 1
+                    }
+                }
+                pos += bLen
+            }
+            return out ?: raw
+        }
+
+        /**
          * Fallback descriptor extraction from Android's cached [UsbDeviceConnection.getRawDescriptors]
-         * when a live EP0 GET_DESCRIPTOR controlTransfer fails or stalls on keyboards/mice/gamepads.
+         * when a live EP0 GET_DESCRIPTOR controlTransfer fails or stalls on keyboards/mice/gamepads,
+         * plus USB String Descriptor synthesis from [android.hardware.usb.UsbDevice] metadata.
          */
         fun extractDescriptorFallback(
             raw: ByteArray?,
@@ -109,7 +135,10 @@ class UrbSession(
             bRequest: Int,
             wValue: Int,
             wIndex: Int,
-            wLength: Int
+            wLength: Int,
+            manufacturer: String? = null,
+            product: String? = null,
+            serialNumber: String? = null
         ): ByteArray? {
             if (bRequest != 0x06 || wLength <= 0 || raw == null || raw.size < 18) return null
             val descType = (wValue ushr 8) and 0xFF
@@ -133,11 +162,36 @@ class UrbSession(
                             if (cfgIdx == descIndex) {
                                 val totalLen = (raw[pos + 2].toInt() and 0xFF) or ((raw[pos + 3].toInt() and 0xFF) shl 8)
                                 val end = minOf(raw.size, pos + totalLen, pos + wLength)
-                                return raw.copyOfRange(pos, end)
+                                return sanitizeConfigDescriptor(raw.copyOfRange(pos, end))
                             }
                             cfgIdx++
                         }
                         pos += bLen
+                    }
+                }
+                0x03 -> { // USB_DT_STRING
+                    if (descIndex == 0) {
+                        val langId = byteArrayOf(4, 0x03, 0x09, 0x04) // en-US (0x0409)
+                        return langId.copyOf(minOf(langId.size, wLength))
+                    }
+                    val iMfg = raw[14].toInt() and 0xFF
+                    val iProd = raw[15].toInt() and 0xFF
+                    val iSer = raw[16].toInt() and 0xFF
+                    val text = when (descIndex) {
+                        iSer -> serialNumber
+                        iProd -> product
+                        iMfg -> manufacturer
+                        else -> null
+                    }
+                    if (!text.isNullOrEmpty()) {
+                        val utf16 = text.toByteArray(Charsets.UTF_16LE)
+                        val bodyLen = minOf(utf16.size, 252)
+                        val bLen = 2 + bodyLen
+                        val out = ByteArray(bLen)
+                        out[0] = bLen.toByte()
+                        out[1] = 0x03
+                        System.arraycopy(utf16, 0, out, 2, bodyLen)
+                        return out.copyOf(minOf(out.size, wLength))
                     }
                 }
                 0x21, 0x22 -> { // HID_DT_HID (0x21) or HID_DT_REPORT (0x22)
@@ -321,10 +375,30 @@ class UrbSession(
             val n = connection.controlTransfer(bmRequestType, bRequest, wValue, wIndex, buffer, wLength, CONTROL_TIMEOUT_MS)
             if (n >= 0) {
                 val actual = minOf(n, cmd.transferBufferLength.coerceAtLeast(0))
-                Triple(UsbIpConstants.USBIP_STATUS_OK, buffer.copyOf(actual), null)
+                val payload = buffer.copyOf(actual)
+                val sanitized = if (bRequest == 0x06 && ((wValue ushr 8) and 0xFF) == 0x02) {
+                    sanitizeConfigDescriptor(payload)
+                } else {
+                    payload
+                }
+                Triple(UsbIpConstants.USBIP_STATUS_OK, sanitized, null)
             } else {
+                val nativeDev = hostManager.findNativeDevice(busId)
+                val mfg = try { nativeDev?.manufacturerName } catch (_: Exception) { null }
+                val prod = try { nativeDev?.productName } catch (_: Exception) { null }
+                val ser = try { nativeDev?.serialNumber } catch (_: Exception) { null }
                 val fallback = try {
-                    extractDescriptorFallback(connection.rawDescriptors, bmRequestType, bRequest, wValue, wIndex, wLength)
+                    extractDescriptorFallback(
+                        connection.rawDescriptors,
+                        bmRequestType,
+                        bRequest,
+                        wValue,
+                        wIndex,
+                        wLength,
+                        manufacturer = mfg,
+                        product = prod,
+                        serialNumber = ser
+                    )
                 } catch (_: Exception) {
                     null
                 }
