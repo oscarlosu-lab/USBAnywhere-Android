@@ -240,6 +240,17 @@ class UsbHostManager private constructor(private val context: Context) {
         return base.copy(bcdDevice = bcdDevice, speed = speed)
     }
 
+    fun requiresCameraPermission(busId: String): Boolean {
+        val rawDev = findNativeDevice(busId) ?: return false
+        if (rawDev.deviceClass == android.hardware.usb.UsbConstants.USB_CLASS_VIDEO) return true
+        for (i in 0 until rawDev.interfaceCount) {
+            if (rawDev.getInterface(i).interfaceClass == android.hardware.usb.UsbConstants.USB_CLASS_VIDEO) {
+                return true
+            }
+        }
+        return false
+    }
+
     /**
      * Request runtime permission for device if needed.
      */
@@ -247,12 +258,12 @@ class UsbHostManager private constructor(private val context: Context) {
         val rawDev = findNativeDevice(busId) ?: return
         if (!usbManager.hasPermission(rawDev)) {
             val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.FLAG_MUTABLE
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             } else {
-                0
+                PendingIntent.FLAG_UPDATE_CURRENT
             }
             val intent = Intent(ACTION_USB_PERMISSION).setPackage(context.packageName)
-            val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, flags)
+            val pendingIntent = PendingIntent.getBroadcast(context, rawDev.deviceId, intent, flags)
             usbManager.requestPermission(rawDev, pendingIntent)
         }
     }

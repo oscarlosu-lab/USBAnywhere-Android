@@ -48,6 +48,10 @@ class ServerViewModel(application: Application) : AndroidViewModel(application) 
         hostManager.requestPermission(busId)
     }
 
+    fun requiresCameraPermission(busId: String): Boolean {
+        return hostManager.requiresCameraPermission(busId)
+    }
+
     fun hasPermission(busId: String): Boolean {
         return hostManager.hasPermission(busId)
     }

@@ -37,8 +37,17 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -69,6 +78,18 @@ fun ServerTab(viewModel: ServerViewModel) {
     val stats by viewModel.serverStats.collectAsStateWithLifecycle()
     val devices by viewModel.connectedDevices.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var pendingBusIdForCamera by remember { mutableStateOf<String?>(null) }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val busId = pendingBusIdForCamera
+        pendingBusIdForCamera = null
+        if (granted && busId != null) {
+            viewModel.requestPermission(busId)
+        }
+    }
 
     // Returning from the system USB-permission dialog resumes the activity: re-read state
     androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
@@ -138,7 +159,16 @@ fun ServerTab(viewModel: ServerViewModel) {
                 OtgDeviceCard(
                     device = device,
                     hasPermission = device.hasPermission,
-                    onRequestPermission = { viewModel.requestPermission(device.busId) },
+                    onRequestPermission = {
+                        if (viewModel.requiresCameraPermission(device.busId) &&
+                            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            pendingBusIdForCamera = device.busId
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        } else {
+                            viewModel.requestPermission(device.busId)
+                        }
+                    },
                     onToggleShare = { viewModel.toggleShare(device.busId) }
                 )
             }

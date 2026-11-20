@@ -16,6 +16,9 @@
 
     <!-- USB Host Support (Feature is optional so app runs on client-only devices too) -->
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
+    <!-- Required on Android 10+ (API 29+) for UsbManager.requestPermission() on UVC cameras / Vive Facial Tracker -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
 
     <!-- Android TV / Nvidia Shield / Google TV & Gamepad Support (Touchscreen is NOT required) -->
     <uses-feature android:name="android.software.leanback" android:required="false" />
