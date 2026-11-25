@@ -5,6 +5,11 @@
 **v3.3.2** | **Part of the [USBAnywhere Ecosystem](https://github.com/oscarlosu-lab/USBAnywhere)**  
 [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & APK](https://github.com/oscarlosu-lab/USBAnywhere-Android/releases/latest) | [🔗 USBAnywhere Windows Client](https://github.com/oscarlosu-lab/USBAnywhere) | [🖥️ USBAnywhere Windows Server](https://github.com/oscarlosu-lab/USBAnywhere-Server) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [☀️ Sunshine & Moonlight Setup](docs/SUNSHINE_MOONLIGHT_INTEGRATION_EN.md) | [📖 Strategic Roadmap](ROADMAP.md) | [🔄 Engineering Workflow](WORKFLOW.md)
 
+[![Android CI](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/ci.yml/badge.svg)](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/oscarlosu-lab/USBAnywhere-Android?style=flat-square&logo=github&color=0ea5e9)](https://github.com/oscarlosu-lab/USBAnywhere-Android/releases/latest)
+[![Last Commit](https://img.shields.io/github/last-commit/oscarlosu-lab/USBAnywhere-Android?style=flat-square&color=10b981)](https://github.com/oscarlosu-lab/USBAnywhere-Android/commits/main)
+[![Security Policy](https://img.shields.io/badge/Security-Policy%20%26%20Zero--Root-10b981?style=flat-square&logo=shield&logoColor=white)](SECURITY.md)
+[![GitHub Stars](https://img.shields.io/github/stars/oscarlosu-lab/USBAnywhere-Android?style=flat-square&logo=github&color=yellow)](https://github.com/oscarlosu-lab/USBAnywhere-Android/stargazers)
 [![Website](https://img.shields.io/badge/Website-USBAnywhere-06B6D4?style=flat-square&logo=googlechrome&logoColor=white)](https://oscarlosu-lab.github.io/USBAnywhere/)
 [![Reddit Community](https://img.shields.io/badge/Reddit-r%2FUsbAnywhere-FF4500?style=flat-square&logo=reddit&logoColor=white)](https://www.reddit.com/r/UsbAnywhere/)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Project-FF5E5B?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/oscarlosu)
@@ -213,6 +218,6 @@ This repository adheres to strict Zero-Trust engineering and security practices.
 
 This project is licensed under the **GNU General Public License v3.0 (GPLv3)**.
 
-> **USBAnywhere Android is 100% Free and Open Source.** You are free to run, study, share, and modify the software under the terms of the GNU General Public License as published by the Free Software Foundation.
+> **USBAnywhere Android is 100% Free and Open Source.** You are free to run, study, share, and modify the software under the terms of the GNU General Public License as published by the Free Software Foundation. **GPLv3 copyleft prohibits closed-source proprietary commercial reuse** and requires preserving all copyright notices with prominent attribution to **oscarlosu-lab** (`https://github.com/oscarlosu-lab`) for any full or partial reuse.
 
 See [LICENSE](LICENSE) for full legal terms and conditions.
