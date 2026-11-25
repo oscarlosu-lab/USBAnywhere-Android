@@ -6,6 +6,8 @@
 [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & APK](https://github.com/oscarlosu-lab/USBAnywhere-Android/releases/latest) | [🔗 USBAnywhere Windows Client](https://github.com/oscarlosu-lab/USBAnywhere) | [🖥️ USBAnywhere Windows Server](https://github.com/oscarlosu-lab/USBAnywhere-Server) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [☀️ Sunshine & Moonlight Setup](docs/SUNSHINE_MOONLIGHT_INTEGRATION_EN.md) | [📖 Strategic Roadmap](ROADMAP.md) | [🔄 Engineering Workflow](WORKFLOW.md)
 
 [![Android CI](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/ci.yml/badge.svg)](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/ci.yml)
+[![CodeQL SAST](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/codeql.yml/badge.svg)](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/codeql.yml)
+[![Gitleaks Secret Scan](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/security.yml/badge.svg)](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/security.yml)
 [![Latest Release](https://img.shields.io/github/v/release/oscarlosu-lab/USBAnywhere-Android?style=flat-square&logo=github&color=0ea5e9)](https://github.com/oscarlosu-lab/USBAnywhere-Android/releases/latest)
 [![Last Commit](https://img.shields.io/github/last-commit/oscarlosu-lab/USBAnywhere-Android?style=flat-square&color=10b981)](https://github.com/oscarlosu-lab/USBAnywhere-Android/commits/main)
 [![Security Policy](https://img.shields.io/badge/Security-Policy%20%26%20Zero--Root-10b981?style=flat-square&logo=shield&logoColor=white)](SECURITY.md)
