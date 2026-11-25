@@ -2,9 +2,16 @@
 
 🌐 **Idioma / Language:** [English](README.md) | **Español**
 
-**v3.3.1** | **Parte del [Ecosistema USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)**  
+**v3.3.2** | **Parte del [Ecosistema USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)**  
 [🌍 Web Oficial](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases y APK](https://github.com/oscarlosu-lab/USBAnywhere-Android/releases/latest) | [🔗 USBAnywhere Cliente Windows](https://github.com/oscarlosu-lab/USBAnywhere) | [🖥️ USBAnywhere Servidor Windows](https://github.com/oscarlosu-lab/USBAnywhere-Server) | [💬 Comunidad Reddit](https://www.reddit.com/r/UsbAnywhere/) | [☀️ Guía Sunshine & Moonlight](docs/SUNSHINE_MOONLIGHT_INTEGRATION_ES.md) | [📖 Roadmap Estratégico](ROADMAP.md) | [🔄 Workflow de Ingeniería](WORKFLOW.md)
 
+[![Android CI](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/ci.yml)
+[![CodeQL SAST](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/codeql.yml)
+[![Gitleaks Secret Scan](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/security.yml)
+[![Latest Release](https://img.shields.io/github/v/release/oscarlosu-lab/USBAnywhere-Android?style=flat-square&logo=github&color=0ea5e9)](https://github.com/oscarlosu-lab/USBAnywhere-Android/releases/latest)
+[![Last Commit](https://img.shields.io/github/last-commit/oscarlosu-lab/USBAnywhere-Android?style=flat-square&color=10b981)](https://github.com/oscarlosu-lab/USBAnywhere-Android/commits/main)
+[![Security Policy](https://img.shields.io/badge/Security-Policy%20%26%20Zero--Root-10b981?style=flat-square&logo=shield&logoColor=white)](SECURITY.md)
+[![GitHub Stars](https://img.shields.io/github/stars/oscarlosu-lab/USBAnywhere-Android?style=flat-square&logo=github&color=yellow)](https://github.com/oscarlosu-lab/USBAnywhere-Android/stargazers)
 [![Web Oficial](https://img.shields.io/badge/Web-USBAnywhere-06B6D4?style=flat-square&logo=googlechrome&logoColor=white)](https://oscarlosu-lab.github.io/USBAnywhere/)
 [![Comunidad Reddit](https://img.shields.io/badge/Reddit-r%2FUsbAnywhere-FF4500?style=flat-square&logo=reddit&logoColor=white)](https://www.reddit.com/r/UsbAnywhere/)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Apoyar%20Proyecto-FF5E5B?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/oscarlosu)
@@ -164,6 +171,12 @@ La interfaz de usuario está desarrollada íntegramente en **Jetpack Compose Mat
 
 ---
 
+## 🆕 Novedades en v3.3.2
+
+- 📷 **Soporte UVC y Vive Facial Tracker (`CAMERA`)** — Solicitud automática del permiso `CAMERA` antes de abrir dispositivos de vídeo USB (UVC) en Android 10+ para evitar bloqueos del sistema al capturar cámaras y trackers faciales.
+
+---
+
 ## 🔒 Política de Seguridad y Contribuciones
 
 Este repositorio sigue las directivas estrictas de seguridad y calidad de código. Se admiten contribuciones, auditorías de seguridad y reportes de incidencias a través de Pull Requests e Issues en GitHub.
@@ -174,6 +187,6 @@ Este repositorio sigue las directivas estrictas de seguridad y calidad de códig
 
 Este proyecto está bajo la licencia **GNU General Public License v3.0 (GPLv3)**.
 
-> **USBAnywhere Android es 100% software libre y código abierto.** Eres libre de ejecutar, estudiar, compartir y modificar el software bajo los términos de la Licencia Pública General de GNU publicada por la Free Software Foundation.
+> **USBAnywhere Android es 100% software libre y código abierto.** Eres libre de ejecutar, estudiar, compartir y modificar el software bajo los términos de la Licencia Pública General de GNU publicada por la Free Software Foundation. **El copyleft de GPLv3 prohíbe la reutilización comercial propietaria de código cerrado** y exige conservar todos los avisos de copyright con atribución visible a **oscarlosu-lab** (`https://github.com/oscarlosu-lab`) ante cualquier reutilización total o parcial.
 
 Consulta el archivo [LICENSE](LICENSE) para ver el texto completo de la licencia.
