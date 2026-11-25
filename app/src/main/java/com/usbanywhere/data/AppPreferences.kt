@@ -16,7 +16,7 @@ import android.util.Log
 object AppPreferences {
 
     private const val TAG = "AppPreferences"
-    private const val PREFS_NAME = "usbanywhere_preferences"
+    private const val PREFS_NAME = "snakeusbip_preferences"
 
     // Preference keys
     const val KEY_AUTOSTART_ON_BOOT = "pref_autostart_on_boot"
@@ -26,6 +26,7 @@ object AppPreferences {
     const val KEY_KIOSK_MODE = "pref_kiosk_mode"
     const val KEY_SERVER_PORT = "pref_server_port"
     const val KEY_SUNSHINE_PORT = "pref_sunshine_port"
+    const val KEY_SUNSHINE_TOKEN = "pref_sunshine_token"
     const val KEY_NOTIFICATIONS_ENABLED = "pref_notifications_enabled"
     const val KEY_HAPTIC_FEEDBACK_ENABLED = "pref_haptic_feedback_enabled"
 
@@ -104,6 +105,14 @@ object AppPreferences {
     fun setSunshinePort(context: Context, port: Int) {
         val validPort = if (port in 1024..65535) port else DEFAULT_SUNSHINE_PORT
         getPrefs(context).edit().putInt(KEY_SUNSHINE_PORT, validPort).apply()
+    }
+
+    fun getSunshineToken(context: Context): String {
+        return getPrefs(context).getString(KEY_SUNSHINE_TOKEN, "")?.trim().orEmpty()
+    }
+
+    fun setSunshineToken(context: Context, token: String) {
+        getPrefs(context).edit().putString(KEY_SUNSHINE_TOKEN, token.trim()).apply()
     }
 
     fun isNotificationsEnabled(context: Context): Boolean {

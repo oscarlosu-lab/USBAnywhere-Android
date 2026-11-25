@@ -397,9 +397,9 @@ class UsbIpServerService : Service() {
                                 "STATUS" -> {
                                     val versionName = try {
                                         @Suppress("DEPRECATION")
-                                        packageManager.getPackageInfo(packageName, 0).versionName ?: "3.3.1"
+                                        packageManager.getPackageInfo(packageName, 0).versionName ?: "3.3.2"
                                     } catch (_: Exception) {
-                                        "3.3.1"
+                                        "3.3.2"
                                     }
                                     org.json.JSONObject()
                                         .put("status", "OK")

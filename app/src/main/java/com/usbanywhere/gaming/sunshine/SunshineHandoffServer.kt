@@ -29,7 +29,8 @@ import java.net.SocketException
  */
 class SunshineHandoffServer(
     private val port: Int = DEFAULT_PORT,
-    private val onModeChanged: (HandoffMode) -> Unit = {}
+    private val onModeChanged: (HandoffMode) -> Unit = {},
+    private val authTokenProvider: () -> String = { "" }
 ) {
 
     companion object {
@@ -86,6 +87,21 @@ class SunshineHandoffServer(
         Log.i(TAG, "Sunshine Handoff Server stopped")
     }
 
+    internal fun isAuthorized(headers: Map<String, String>): Boolean {
+        val expected = authTokenProvider().trim()
+        if (expected.isEmpty()) return true
+        val tokenHeader = (headers["x-usbanywhere-token"] ?: headers["x-snakeusbip-token"])?.trim().orEmpty()
+        val authHeader = headers["authorization"]?.trim().orEmpty()
+        val bearerToken = if (authHeader.startsWith("Bearer ", ignoreCase = true)) {
+            authHeader.substring(7).trim()
+        } else {
+            ""
+        }
+        val expectedBytes = expected.toByteArray(Charsets.UTF_8)
+        return (tokenHeader.isNotEmpty() && java.security.MessageDigest.isEqual(tokenHeader.toByteArray(Charsets.UTF_8), expectedBytes)) ||
+            (bearerToken.isNotEmpty() && java.security.MessageDigest.isEqual(bearerToken.toByteArray(Charsets.UTF_8), expectedBytes))
+    }
+
     private suspend fun handleClient(socket: Socket) = withContext(Dispatchers.IO) {
         try {
             socket.soTimeout = 3000
@@ -102,10 +118,23 @@ class SunshineHandoffServer(
             val method = parts[0].uppercase()
             val path = parts[1].split("?")[0]
 
-            // Drain headers
-            var line: String?
-            while (reader.readLine().also { line = it } != null) {
-                if (line.isNullOrEmpty()) break
+            // Read headers (bounded to 32 headers to prevent unbounded memory growth)
+            val headers = mutableMapOf<String, String>()
+            var line: String? = null
+            var headerCount = 0
+            while (headerCount < 32 && reader.readLine().also { line = it } != null) {
+                val h = line ?: break
+                if (h.isEmpty()) break
+                val colonIdx = h.indexOf(':')
+                if (colonIdx > 0 && h.length <= 2048) {
+                    headers[h.substring(0, colonIdx).trim().lowercase()] = h.substring(colonIdx + 1).trim()
+                }
+                headerCount++
+            }
+
+            if (method == "POST" && !isAuthorized(headers)) {
+                sendResponse(output, 401, "Unauthorized", "{\"error\":\"Unauthorized\"}")
+                return@withContext
             }
 
             when {

@@ -41,6 +41,9 @@ object SunshineHandoffManager {
             port = configuredPort,
             onModeChanged = { mode ->
                 notifyModeChange(mode)
+            },
+            authTokenProvider = {
+                appContext?.let { com.usbanywhere.data.AppPreferences.getSunshineToken(it) }.orEmpty()
             }
         ).also { it.start() }
 
