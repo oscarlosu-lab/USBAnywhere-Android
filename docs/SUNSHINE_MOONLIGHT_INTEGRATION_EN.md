@@ -98,3 +98,15 @@ curl.exe http://<ANDROID_TV_IP>:3242/api/status
 # Expected Response:
 # {"status":"ok","mode":"LOCAL_ANDROID_TV","title":"Local Android TV","port":3242}
 ```
+
+---
+
+## 🔒 Optional Webhook Token Authentication (`v3.4.0-rc.1`)
+
+When a webhook token is configured in **USBAnywhere Android**, `SunshineHandoffServer` enforces strict HTTP header bounds and requires authentication on port `3242` using either header:
+
+```powershell
+curl.exe -s --connect-timeout 2 -m 3 -X POST -H "X-USBAnywhere-Token: <token>" "http://%SUNSHINE_CLIENT_IP%:3242/api/stream/start"
+# or:
+curl.exe -s --connect-timeout 2 -m 3 -X POST -H "Authorization: Bearer <token>" "http://%SUNSHINE_CLIENT_IP%:3242/api/stream/start"
+```

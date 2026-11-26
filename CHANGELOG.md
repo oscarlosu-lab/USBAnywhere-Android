@@ -1,5 +1,13 @@
 # CHANGELOG - USBAnywhere Android
 
+## [3.4.0-rc.1] - 2026-11-26 (Release Candidate)
+
+### Added
+- **Sunshine Webhook Token Authentication & Header Bounds (`SunshineHandoffServer.kt`)**:
+  - Added optional `X-USBAnywhere-Token` / `Authorization: Bearer` authentication on HTTP port `3242` and strict HTTP header size bounds.
+- **Dynamic TCP `3241` Inventory Parser (`DynamicInventoryParser.kt`)**:
+  - Structured JSON parser for dynamic remote device discovery and listing over TCP `3241`.
+
 ## [3.3.1] - 2026-11-15
 
 ### Fixed
