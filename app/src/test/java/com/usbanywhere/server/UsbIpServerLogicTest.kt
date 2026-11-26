@@ -160,4 +160,16 @@ class UsbIpServerLogicTest {
         assertEquals(0x03, ser[1].toInt() and 0xFF)
         assertEquals("SN42", String(ser, 2, ser.size - 2, Charsets.UTF_16LE))
     }
+
+    @Test
+    fun selectVideoDevicePermissionPrefersHorizonUsbCameraWhenPresent() {
+        assertEquals(
+            "horizonos.permission.USB_CAMERA",
+            UsbHostManager.selectVideoDevicePermission(hasHorizonUsbCameraPermission = true)
+        )
+        assertEquals(
+            android.Manifest.permission.CAMERA,
+            UsbHostManager.selectVideoDevicePermission(hasHorizonUsbCameraPermission = false)
+        )
+    }
 }

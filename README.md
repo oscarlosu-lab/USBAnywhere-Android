@@ -2,7 +2,7 @@
 
 🌐 **Language / Idioma:** **English** | [Español](README_ES.md)
 
-**v3.4.0** | **Part of the [USBAnywhere Ecosystem](https://github.com/oscarlosu-lab/USBAnywhere)**  
+**v3.4.1** | **Part of the [USBAnywhere Ecosystem](https://github.com/oscarlosu-lab/USBAnywhere)**  
 [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & APK](https://github.com/oscarlosu-lab/USBAnywhere-Android/releases/latest) | [🔗 USBAnywhere Windows Client](https://github.com/oscarlosu-lab/USBAnywhere) | [🖥️ USBAnywhere Windows Server](https://github.com/oscarlosu-lab/USBAnywhere-Server) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [☀️ Sunshine & Moonlight Setup](docs/SUNSHINE_MOONLIGHT_INTEGRATION_EN.md) | [📖 Strategic Roadmap](ROADMAP.md) | [🔄 Engineering Workflow](WORKFLOW.md)
 
 [![Android CI](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/ci.yml)
@@ -192,7 +192,7 @@ app/src/main/
 
 ### Compilation Commands
 ```powershell
-# 1. Run unit test suite (45 tests)
+# 1. Run unit test suite (46 tests)
 .\gradlew.bat test
 
 # 2. Build Minified Signed Production APK (2.07 MB)
@@ -204,11 +204,15 @@ app/src/main/
 
 ### Automated Testing & Quality Gate
 ```powershell
-# Execute the full unit test suite (45 tests)
+# Execute the full unit test suite (46 tests)
 .\gradlew.bat test
 ```
 
 ---
+
+## 🆕 What's New in v3.4.1
+
+- 🥽 **Meta Quest / Horizon OS `USB_CAMERA` Support (`UsbHostManager.kt`, `ServerTab.kt`)** — Requests `horizonos.permission.USB_CAMERA` on Horizon OS for external UVC cameras & trackers (avoiding spatial/avatar prompts) while preserving `android.permission.CAMERA` on standard Android phones/TVs.
 
 ## 🆕 What's New in v3.4.0
 

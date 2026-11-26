@@ -1,10 +1,12 @@
 package com.usbanywhere.server
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbDeviceConnection
@@ -26,6 +28,24 @@ class UsbHostManager private constructor(private val context: Context) {
     companion object {
         private const val TAG = "UsbHostManager"
         const val ACTION_USB_PERMISSION = "com.usbanywhere.USB_PERMISSION"
+        const val HORIZON_USB_CAMERA_PERMISSION = "horizonos.permission.USB_CAMERA"
+
+        /**
+         * Horizon OS (Meta Quest) splits external UVC USB camera access out of
+         * android.permission.CAMERA into horizonos.permission.USB_CAMERA.
+         */
+        fun selectVideoDevicePermission(hasHorizonUsbCameraPermission: Boolean): String =
+            if (hasHorizonUsbCameraPermission) HORIZON_USB_CAMERA_PERMISSION else Manifest.permission.CAMERA
+
+        fun resolveVideoDevicePermission(context: Context): String {
+            val hasHorizonPerm = try {
+                context.packageManager.getPermissionInfo(HORIZON_USB_CAMERA_PERMISSION, 0)
+                true
+            } catch (_: PackageManager.NameNotFoundException) {
+                false
+            }
+            return selectVideoDevicePermission(hasHorizonPerm)
+        }
 
         @Volatile private var instance: UsbHostManager? = null
 
@@ -256,7 +276,12 @@ class UsbHostManager private constructor(private val context: Context) {
      */
     fun requestPermission(busId: String) {
         val rawDev = findNativeDevice(busId) ?: return
-        if (!usbManager.hasPermission(rawDev)) {
+        val granted = usbManager.hasPermission(rawDev)
+        Log.i(
+            TAG,
+            "requestPermission(busId=$busId, vid=0x${rawDev.vendorId.toString(16)}, pid=0x${rawDev.productId.toString(16)}, hasPermission=$granted, requiresVideoPerm=${requiresCameraPermission(busId)})"
+        )
+        if (!granted) {
             val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             } else {

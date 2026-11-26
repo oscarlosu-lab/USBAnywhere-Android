@@ -1,5 +1,11 @@
 # CHANGELOG - USBAnywhere Android
 
+## [3.4.1] - 2026-11-27
+
+### Fixed
+- **Meta Quest / Horizon OS `horizonos.permission.USB_CAMERA` Support (`AndroidManifest.xml`, `UsbHostManager.kt`, `ServerTab.kt`)**:
+  - Added `horizonos.permission.USB_CAMERA` and runtime detection (`resolveVideoDevicePermission()`) so Meta Quest devices request Horizon OS's external USB camera permission instead of `android.permission.CAMERA` (which Horizon OS routes to spatial/avatar prompts), while preserving `android.permission.CAMERA` on standard Android phones and TVs. Verified end-to-end on real Meta Quest 3S hardware with UVC video + audio streaming to Windows.
+
 ## [3.4.0] - 2026-11-26
 
 ### Added

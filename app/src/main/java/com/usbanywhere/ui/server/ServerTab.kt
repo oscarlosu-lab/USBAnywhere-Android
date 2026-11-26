@@ -37,8 +37,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import android.Manifest
 import android.content.pm.PackageManager
+import android.util.Log
+import com.usbanywhere.server.UsbHostManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -79,6 +80,7 @@ fun ServerTab(viewModel: ServerViewModel) {
     val devices by viewModel.connectedDevices.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val videoPermission = remember(context) { UsbHostManager.resolveVideoDevicePermission(context) }
     var pendingBusIdForCamera by remember { mutableStateOf<String?>(null) }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
@@ -86,6 +88,7 @@ fun ServerTab(viewModel: ServerViewModel) {
     ) { granted ->
         val busId = pendingBusIdForCamera
         pendingBusIdForCamera = null
+        Log.i("ServerTab", "Video permission ($videoPermission) granted=$granted for busId=$busId")
         if (granted && busId != null) {
             viewModel.requestPermission(busId)
         }
@@ -161,10 +164,10 @@ fun ServerTab(viewModel: ServerViewModel) {
                     hasPermission = device.hasPermission,
                     onRequestPermission = {
                         if (viewModel.requiresCameraPermission(device.busId) &&
-                            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                            ContextCompat.checkSelfPermission(context, videoPermission) != PackageManager.PERMISSION_GRANTED
                         ) {
                             pendingBusIdForCamera = device.busId
-                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                            cameraPermissionLauncher.launch(videoPermission)
                         } else {
                             viewModel.requestPermission(device.busId)
                         }

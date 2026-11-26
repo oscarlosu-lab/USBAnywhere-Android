@@ -18,6 +18,8 @@
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
     <!-- Required on Android 10+ (API 29+) for UsbManager.requestPermission() on UVC cameras / Vive Facial Tracker -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Required on Meta Quest / Horizon OS for UsbManager access to external USB Video Class (UVC) devices -->
+    <uses-permission android:name="horizonos.permission.USB_CAMERA" />
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
 
     <!-- Android TV / Nvidia Shield / Google TV & Gamepad Support (Touchscreen is NOT required) -->
