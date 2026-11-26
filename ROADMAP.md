@@ -1,8 +1,8 @@
 # 🗺️ USBAnywhere Android — Strategic Technical Roadmap
 
-> **Target Version**: v3.3.1 Stable (Dual-Mode USB/IP Engine & Android TV Suite)  
+> **Target Version**: v3.3.2 Stable / v3.4.0-rc.1 (Release Candidate)  
 > **Orientation**: Community-driven (incorporating insights from r/UsbAnywhere, r/MoonlightStreaming, r/cloudygamer, r/simracing, and r/selfhosted)  
-> **Status**: Live & Published (v3.3.1 on GitHub & Community Triad)
+> **Status**: Live & Published (`v3.3.2` Stable + `v3.4.0-rc.1` Pre-release)
 
 ---
 
@@ -39,7 +39,7 @@ flowchart TD
         D1["Non-Intrusive Boot & USB Auto-Start<br><i>(Opt-in via Dynamic Component State)</i>"]
         D2["Configurable Ports & UX Preferences<br><i>(Port 3240/3242 + Toasts & Haptic Toggles)</i>"]
         D3["Production Signing & R8 Shrinking<br><i>(2.07 MB APK / 4.26 MB AAB Bundle - 90% Shrink)</i>"]
-        D4["Zero-Trust QA & 38 Unit Tests Green"]
+        D4["Zero-Trust QA & 45 Unit Tests Green"]
     end
 ```
 
@@ -125,3 +125,11 @@ flowchart TD
   - Preserved USB/IP binary protocol DTOs, SQLite ORM entities, Kotlin coroutines companion objects, and Android Services/Receivers.
 - **Verification on Device**:
   - Installed and verified live on Android 15 (`emulator-5554`) with zero runtime regressions.
+
+---
+
+## 🟢 Phase 5: UVC Permissions, Webhook Security & Dynamic Inventory (`v3.3.2` / `v3.4.0-rc.1`)
+
+- [x] **UVC / HTC Vive Facial Tracker `CAMERA` Permission Chaining (`v3.3.2`)**: Runtime `CAMERA` permission gating for `USB_CLASS_VIDEO` devices on Android 10+ and Meta Quest 3.
+- [x] **Sunshine Webhook Token Auth & HTTP Header Bounds (`v3.4.0-rc.1`)**: Optional `X-USBAnywhere-Token` / `Authorization: Bearer` authentication and bounded HTTP header parsing in `SunshineHandoffServer.kt`.
+- [x] **Dynamic TCP `3241` Inventory Parser (`v3.4.0-rc.1`)**: Structured JSON inventory parsing (`DynamicInventoryParser.kt`) with 45/45 unit tests passing.

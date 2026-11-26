@@ -20,7 +20,7 @@
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose%20Material%203-purple.svg)](https://developer.android.com/jetpack/compose)
 [![Protocolo](https://img.shields.io/badge/Protocolo-USB%2FIP%20(Borrador%20RFC)-orange.svg)](https://docs.kernel.org/usb/usbip_protocol.html)
 [![Licencia](https://img.shields.io/badge/Licencia-GPL--3.0-red.svg)](LICENSE)
-[![Pruebas](https://img.shields.io/badge/Pruebas-44%2F44%20Superadas-brightgreen.svg)]()
+[![Pruebas](https://img.shields.io/badge/Pruebas-45%2F45%20Superadas-brightgreen.svg)]()
 [![Tamaño APK](https://img.shields.io/badge/Tamaño%20APK-2.07%20MB%20(90%25%20Reducido)-success.svg)]()
 
 > **¿Por qué pagar 49,00 $ por servidor y estar limitado a un único dispositivo USB?**  
@@ -159,7 +159,7 @@ La interfaz de usuario está desarrollada íntegramente en **Jetpack Compose Mat
 ## 🛠️ Compilación y Pruebas
 
 ```powershell
-# 1. Ejecutar las 38 pruebas unitarias
+# 1. Ejecutar las 45 pruebas unitarias
 .\gradlew.bat test
 
 # 2. Generar APK Release minificado y firmado (2.07 MB)
@@ -170,6 +170,11 @@ La interfaz de usuario está desarrollada íntegramente en **Jetpack Compose Mat
 ```
 
 ---
+
+## 🧪 Novedades en v3.4.0-rc.1 (Release Candidate)
+
+- 🔒 **Autenticación por Token y Límites HTTP en Webhook Sunshine (`SunshineHandoffServer.kt`)** — Soporte opcional para `X-USBAnywhere-Token` / `Authorization: Bearer` en el puerto HTTP `3242` con límites estrictos de cabecera.
+- 📋 **Parser de Inventario Dinámico TCP `3241` (`DynamicInventoryParser.kt`)** — Procesado JSON estructurado para descubrimiento y listado remoto dinámico.
 
 ## 🆕 Novedades en v3.3.2
 

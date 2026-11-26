@@ -20,7 +20,7 @@
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose%20Material%203-purple.svg)](https://developer.android.com/jetpack/compose)
 [![Protocol](https://img.shields.io/badge/Protocol-USB%2FIP%20(RFC%20Draft)-orange.svg)](https://docs.kernel.org/usb/usbip_protocol.html)
 [![License](https://img.shields.io/badge/License-GPL--3.0-red.svg)](LICENSE)
-[![Quality Gate](https://img.shields.io/badge/Tests-44%2F44%20Passing-brightgreen.svg)]()
+[![Quality Gate](https://img.shields.io/badge/Tests-45%2F45%20Passing-brightgreen.svg)]()
 [![Footprint](https://img.shields.io/badge/APK%20Size-2.07%20MB%20(90%25%20Shrunk)-success.svg)]()
 
 > **Why pay $49.00 per server and be restricted to a single USB device?**  
@@ -192,7 +192,7 @@ app/src/main/
 
 ### Compilation Commands
 ```powershell
-# 1. Run unit test suite (38 tests)
+# 1. Run unit test suite (45 tests)
 .\gradlew.bat test
 
 # 2. Build Minified Signed Production APK (2.07 MB)
@@ -204,9 +204,17 @@ app/src/main/
 
 ### Automated Testing & Quality Gate
 ```powershell
-# Execute the full unit test suite (38 tests)
+# Execute the full unit test suite (45 tests)
 .\gradlew.bat test
 ```
+
+---
+
+## 🧪 What's New in v3.4.0-rc.1 (Release Candidate)
+
+- 🔒 **Sunshine Webhook Token Auth & Header Bounds (`SunshineHandoffServer.kt`)** — Optional `X-USBAnywhere-Token` / `Authorization: Bearer` authentication on HTTP port `3242` with strict header size limits.
+- 📋 **Dynamic TCP `3241` Inventory Parser (`DynamicInventoryParser.kt`)** — Structured JSON parser for dynamic remote device discovery and listing.
+- 📷 **UVC & Vive Facial Tracker Permission Fix (`v3.3.2`)** — Automatic runtime `CAMERA` permission request before `UsbManager.requestPermission()` for `USB_CLASS_VIDEO` devices on Android 10+ and Meta Quest 3.
 
 ---
 

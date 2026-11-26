@@ -8,6 +8,11 @@
 - **Dynamic TCP `3241` Inventory Parser (`DynamicInventoryParser.kt`)**:
   - Structured JSON parser for dynamic remote device discovery and listing over TCP `3241`.
 
+## [3.3.2] - 2026-11-20
+
+### Fixed
+- **UVC / HTC Vive Facial Tracker USB Permission (`CAMERA`)**: Added `android.permission.CAMERA` and chained runtime `CAMERA` permission prompts before `UsbManager.requestPermission()` for `USB_CLASS_VIDEO` devices on Android 10+ and Meta Quest 3.
+
 ## [3.3.1] - 2026-11-15
 
 ### Fixed
