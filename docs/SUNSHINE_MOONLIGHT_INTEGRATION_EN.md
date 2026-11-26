@@ -101,7 +101,7 @@ curl.exe http://<ANDROID_TV_IP>:3242/api/status
 
 ---
 
-## 🔒 Optional Webhook Token Authentication (`v3.4.0-rc.1`)
+## 🔒 Optional Webhook Token Authentication (`v3.4.0`)
 
 When a webhook token is configured in **USBAnywhere Android**, `SunshineHandoffServer` enforces strict HTTP header bounds and requires authentication on port `3242` using either header:
 

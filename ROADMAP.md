@@ -1,8 +1,8 @@
 # 🗺️ USBAnywhere Android — Strategic Technical Roadmap
 
-> **Target Version**: v3.3.2 Stable / v3.4.0-rc.1 (Release Candidate)  
+> **Target Version**: v3.3.2 Stable / v3.4.0  
 > **Orientation**: Community-driven (incorporating insights from r/UsbAnywhere, r/MoonlightStreaming, r/cloudygamer, r/simracing, and r/selfhosted)  
-> **Status**: Live & Published (`v3.3.2` Stable + `v3.4.0-rc.1` Pre-release)
+> **Status**: Live & Published (`v3.3.2` Stable + `v3.4.0` Pre-release)
 
 ---
 
@@ -128,8 +128,8 @@ flowchart TD
 
 ---
 
-## 🟢 Phase 5: UVC Permissions, Webhook Security & Dynamic Inventory (`v3.3.2` / `v3.4.0-rc.1`)
+## 🟢 Phase 5: UVC Permissions, Webhook Security & Dynamic Inventory (`v3.3.2` / `v3.4.0`)
 
 - [x] **UVC / HTC Vive Facial Tracker `CAMERA` Permission Chaining (`v3.3.2`)**: Runtime `CAMERA` permission gating for `USB_CLASS_VIDEO` devices on Android 10+ and Meta Quest 3.
-- [x] **Sunshine Webhook Token Auth & HTTP Header Bounds (`v3.4.0-rc.1`)**: Optional `X-USBAnywhere-Token` / `Authorization: Bearer` authentication and bounded HTTP header parsing in `SunshineHandoffServer.kt`.
-- [x] **Dynamic TCP `3241` Inventory Parser (`v3.4.0-rc.1`)**: Structured JSON inventory parsing (`DynamicInventoryParser.kt`) with 45/45 unit tests passing.
+- [x] **Sunshine Webhook Token Auth & HTTP Header Bounds (`v3.4.0`)**: Optional `X-USBAnywhere-Token` / `Authorization: Bearer` authentication and bounded HTTP header parsing in `SunshineHandoffServer.kt`.
+- [x] **Dynamic TCP `3241` Inventory Parser (`v3.4.0`)**: Structured JSON inventory parsing (`DynamicInventoryParser.kt`) with 45/45 unit tests passing.

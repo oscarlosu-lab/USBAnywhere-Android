@@ -1,6 +1,6 @@
 # CHANGELOG - USBAnywhere Android
 
-## [3.4.0-rc.1] - 2026-11-26 (Release Candidate)
+## [3.4.0] - 2026-11-26
 
 ### Added
 - **Sunshine Webhook Token Authentication & Header Bounds (`SunshineHandoffServer.kt`)**:
