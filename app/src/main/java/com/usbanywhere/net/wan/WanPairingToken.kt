@@ -12,7 +12,10 @@ object WanPairingToken {
         val host: String,
         val port: Int = 3240,
         val serverName: String = "USBAnywhere-Server",
-        val isTlsEnabled: Boolean = false
+        val isTlsEnabled: Boolean = false,
+        val tlsPort: Int = 3243,
+        val pairingCode: String = "",
+        val tlsFingerprint: String = ""
     ) {
         fun toUri(): String {
             return "usbip://$host:$port?name=$serverName&tls=$isTlsEnabled"
@@ -23,14 +26,50 @@ object WanPairingToken {
             val encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(raw.toByteArray(StandardCharsets.UTF_8))
             return "UA1:$encoded"
         }
+
+        fun toUa2Token(): String {
+            val raw = "$host|$port|$serverName|$tlsPort|$pairingCode|$tlsFingerprint"
+            val encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(raw.toByteArray(StandardCharsets.UTF_8))
+            return "UA2:$encoded"
+        }
     }
 
     /**
-     * Parses either a URI (usbip://...) or a compact token (UA1:...).
+     * Parses a URI (usbip://...), compact token (UA1:...), or pinned pairing token (UA2:...).
      */
     fun parse(input: String): PairingData? {
         val trimmed = input.trim()
         if (trimmed.isEmpty()) return null
+
+        // 0. Check UA2 token: UA2:<base64url(host|port|name|tlsPort|code|fingerprint)>
+        if (trimmed.startsWith("UA2:")) {
+            try {
+                val b64 = trimmed.substring(4)
+                val rawBytes = Base64.getUrlDecoder().decode(b64)
+                val raw = String(rawBytes, StandardCharsets.UTF_8)
+                val parts = raw.split("|")
+                if (parts.size >= 5) {
+                    val host = parts[0].trim()
+                    if (host.isEmpty()) return null
+                    val port = parts[1].toIntOrNull() ?: 3240
+                    val name = parts[2].trim().ifEmpty { "USBAnywhere-Server" }
+                    val tlsPort = parts[3].toIntOrNull() ?: 3243
+                    val code = parts[4].trim()
+                    val fp = parts.getOrNull(5)?.trim()?.lowercase() ?: ""
+                    return PairingData(
+                        host = host,
+                        port = port,
+                        serverName = name,
+                        isTlsEnabled = tlsPort > 0,
+                        tlsPort = tlsPort,
+                        pairingCode = code,
+                        tlsFingerprint = fp
+                    )
+                }
+            } catch (_: Exception) {
+                return null
+            }
+        }
 
         // 1. Check compact token: UA1:<base64>
         if (trimmed.startsWith("UA1:")) {

@@ -2,14 +2,29 @@ package com.usbanywhere.ui.settings
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.usbanywhere.data.AppPreferences
+import com.usbanywhere.update.AndroidUpdateChecker
+import com.usbanywhere.update.UpdateCheckResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+sealed interface UpdateUiState {
+    data object Idle : UpdateUiState
+    data object Checking : UpdateUiState
+    data class UpToDate(val currentVersion: String) : UpdateUiState
+    data class Available(val info: UpdateCheckResult) : UpdateUiState
+    data class Downloading(val progress: Int) : UpdateUiState
+    data class ReadyToInstall(val version: String) : UpdateUiState
+    data class Error(val message: String) : UpdateUiState
+}
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -44,6 +59,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private val _isRootAvailable = MutableStateFlow(false)
     val isRootAvailable: StateFlow<Boolean> = _isRootAvailable.asStateFlow()
+
+    private val _bindAddress = MutableStateFlow(AppPreferences.getBindAddress(context))
+    val bindAddress: StateFlow<String> = _bindAddress.asStateFlow()
+
+    private val _updateState = MutableStateFlow<UpdateUiState>(UpdateUiState.Idle)
+    val updateState: StateFlow<UpdateUiState> = _updateState.asStateFlow()
 
     private val _logs = MutableStateFlow<List<String>>(emptyList())
     val logs: StateFlow<List<String>> = _logs.asStateFlow()
@@ -134,6 +155,51 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _isHapticFeedbackEnabled.value = next
         AppPreferences.setHapticFeedbackEnabled(context, next)
         addLog("Haptic Feedback & Rumble: ${if (next) "Enabled" else "Disabled"}")
+    }
+
+    fun setBindAddress(ip: String): Boolean {
+        if (!AppPreferences.isValidBindAddress(ip)) return false
+        AppPreferences.setBindAddress(context, ip)
+        val saved = AppPreferences.getBindAddress(context)
+        _bindAddress.value = saved
+        addLog("Bind interface IP: ${if (saved.isEmpty()) "0.0.0.0 (All)" else saved}")
+        return true
+    }
+
+    fun checkForUpdates() {
+        val currentVersion = try {
+            @Suppress("DEPRECATION")
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "3.4.1"
+        } catch (_: Exception) {
+            "3.4.1"
+        }
+        _updateState.value = UpdateUiState.Checking
+        viewModelScope.launch(Dispatchers.IO) {
+            val res = AndroidUpdateChecker.checkForUpdate(currentVersion)
+            _updateState.value = when {
+                res.error != null -> UpdateUiState.Error(res.error)
+                res.updateAvailable -> UpdateUiState.Available(res)
+                else -> UpdateUiState.UpToDate(currentVersion)
+            }
+        }
+    }
+
+    fun downloadAndInstallUpdate(info: UpdateCheckResult) {
+        _updateState.value = UpdateUiState.Downloading(0)
+        viewModelScope.launch(Dispatchers.IO) {
+            val dl = AndroidUpdateChecker.downloadAndVerifyApk(context, info) { pct ->
+                _updateState.value = UpdateUiState.Downloading(pct)
+            }
+            dl.fold(
+                onSuccess = { apk ->
+                    _updateState.value = UpdateUiState.ReadyToInstall(info.latestVersion)
+                    AndroidUpdateChecker.launchApkInstaller(context, apk)
+                },
+                onFailure = { err ->
+                    _updateState.value = UpdateUiState.Error(err.message ?: "Verification failed")
+                }
+            )
+        }
     }
 
     fun addLog(message: String) {

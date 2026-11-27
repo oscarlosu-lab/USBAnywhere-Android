@@ -1,5 +1,14 @@
 # CHANGELOG - USBAnywhere Android
 
+## [3.5.0] - 2026-11-27
+
+### Added
+- **Zero-Config `UA2:` Tokens, 6-Digit Pairing & Certificate-Pinned TLS (`WanPairingToken`, `PairingCodeManager`, `TlsSocketFactoryHelper`)**:
+  - Added ephemeral 6-digit pairing codes (5-minute TTL, 5-attempt lockout) in `WanMeshCard`, `PAIR <code>` control handler, `BindAddress` listener scoping, and `createPinnedTlsContext` SHA-256 verification.
+- **Multi-Provider Streaming Handoff & Per-Device Policies (`SunshineHandoffManager`, `SunshineHandoffServer`, `ServerTab`)**:
+  - Extended webhook & UI badge support to **Sunshine, Apollo, Vibeshine, Vibepollo, Parsec, and Steam Remote Play** (`?provider=...`), plus per-device `DeviceHandoffPolicy` (`Local` / `Stream Only` / `Always PC`).
+- **One-Click SHA-256 GitHub Releases Updater (`AndroidUpdateChecker`) & Updated 8-Layer Adaptive Icon**.
+
 ## [3.4.1] - 2026-11-27
 
 ### Fixed

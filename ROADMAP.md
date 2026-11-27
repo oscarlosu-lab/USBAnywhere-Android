@@ -1,8 +1,8 @@
 # 🗺️ USBAnywhere Android — Strategic Technical Roadmap
 
-> **Target Version**: v3.4.1 Stable  
+> **Target Version**: v3.5.0 Stable  
 > **Orientation**: Community-driven (incorporating insights from r/UsbAnywhere, r/MoonlightStreaming, r/cloudygamer, r/simracing, and r/selfhosted)  
-> **Status**: Live & Published (`v3.4.1` Stable)
+> **Status**: Live & Published (`v3.5.0` Stable)
 
 ---
 
@@ -91,7 +91,7 @@ flowchart TD
 
 - [x] **3.1. Tailscale & WireGuard Native Discovery**:
   - `WanInterfaceDetector`: Active network scan identifying Tailscale CGNAT (`100.64.0.0/10`), WireGuard (`wg0`, `tun*`), and mesh VPN tunnels.
-  - `WanPairingToken`: Compact URI serialization (`UA1:...` base64 token) packaging host IP, port, and server identity.
+  - `WanPairingToken`: Compact URI serialization (`UA1:...` / `UA2:...` base64 token) packaging host IP, port, 6-digit pairing code, and pinned TLS certificate fingerprint.
   - `CyberQrGenerator`: Zero-bloat deterministic QR 25x25 matrix renderer running natively on Compose Canvas without external dependencies (~3MB APK saving).
 - [x] **3.2. Direct RFC-Compliant Wire Protocol & TLS 1.3**:
   - Clean standard USB/IP binary protocol negotiation (RFC draft) without proprietary PIN barriers for plug-and-play client compatibility.
@@ -134,3 +134,13 @@ flowchart TD
 - [x] **UVC / HTC Vive Facial Tracker `CAMERA` Permission Chaining (`v3.3.2`)**: Runtime `CAMERA` permission gating for `USB_CLASS_VIDEO` devices on Android 10+.
 - [x] **Sunshine Webhook Token Auth & HTTP Header Bounds (`v3.4.0`)**: Optional `X-USBAnywhere-Token` / `Authorization: Bearer` authentication and bounded HTTP header parsing in `SunshineHandoffServer.kt`.
 - [x] **Dynamic TCP `3241` Inventory Parser (`v3.4.0`)**: Structured JSON inventory parsing (`DynamicInventoryParser.kt`) with 46/46 unit tests passing.
+
+---
+
+## 🟢 Phase 6: Zero-Trust Pairing, Multi-Provider Streaming Handoff & 1-Click Updater (`v3.5.0`)
+
+- [x] **`UA2:` 6-Digit Pairing Token & QR (`WanMeshCard`)**: Generates a 6-digit pairing code, `UA2:` QR matrix, and pinned TLS 1.3 certificate fingerprint with one-tap code regeneration in `SettingsTab.kt`.
+- [x] **Multi-Provider Streaming Handoff & Per-Device Policy**: Recognizes `Apollo`, `Vibepollo`, `Vibeshine`, `Sunshine`, `Parsec`, and `Steam Remote Play` with a live provider pill badge (`SunshineHandoffCard` in `GamepadTesterTab.kt`) and per-device `DeviceHandoffPolicy` selector (`Local` / `Stream Only` / `Always PC`) persisted in `AppPreferences.kt`.
+- [x] **Network `BindAddress` Scoping**: Configurable bind address for USB/IP (`3240`) and webhook (`3242`) listeners.
+- [x] **1-Click GitHub Releases Updater (`AppUpdateChecker.kt`)**: Checks latest GitHub Releases and verifies `SHA256SUMS.txt` integrity before installing, preserving user settings.
+- [x] **Refreshed Adaptive Launcher Icon & QA**: High-contrast 8-layer adaptive icon (`USBAnywhere` branding) and 53/53 unit tests passing.

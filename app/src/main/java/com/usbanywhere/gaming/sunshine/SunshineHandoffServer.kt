@@ -116,7 +116,17 @@ class SunshineHandoffServer(
             }
 
             val method = parts[0].uppercase()
-            val path = parts[1].split("?")[0]
+            val targetSegments = parts[1].split("?", limit = 2)
+            val path = targetSegments[0]
+            val queryParams = mutableMapOf<String, String>()
+            if (targetSegments.size > 1) {
+                for (pair in targetSegments[1].split("&")) {
+                    val kv = pair.split("=", limit = 2)
+                    if (kv.isNotEmpty() && kv[0].isNotBlank()) {
+                        queryParams[kv[0].lowercase()] = kv.getOrElse(1) { "" }
+                    }
+                }
+            }
 
             // Read headers (bounded to 32 headers to prevent unbounded memory growth)
             val headers = mutableMapOf<String, String>()
@@ -138,13 +148,15 @@ class SunshineHandoffServer(
             }
 
             when {
-                // Sunshine DO Command hook: /api/stream/start (POST only for state mutation)
+                // Sunshine/Apollo/Parsec/Steam DO Command hook: /api/stream/start?provider=...
                 method == "POST" && path == "/api/stream/start" -> {
+                    val provider = StreamProvider.fromQuery(queryParams["provider"])
+                    SunshineHandoffManager.setActiveProvider(provider)
                     SunshineHandoffManager.setMode(HandoffMode.STREAMING_PC)
                     onModeChanged(HandoffMode.STREAMING_PC)
                     sendResponse(
                         output, 200, "OK",
-                        "{\"status\":\"ok\",\"mode\":\"STREAMING_PC\",\"message\":\"Gamepad handed off to Sunshine PC streaming\"}"
+                        "{\"status\":\"ok\",\"mode\":\"STREAMING_PC\",\"provider\":\"${provider.id}\",\"message\":\"Gamepad handed off to ${provider.id} PC streaming\"}"
                     )
                 }
 
@@ -154,7 +166,7 @@ class SunshineHandoffServer(
                     onModeChanged(HandoffMode.LOCAL_ANDROID_TV)
                     sendResponse(
                         output, 200, "OK",
-                        "{\"status\":\"ok\",\"mode\":\"LOCAL_ANDROID_TV\",\"message\":\"Gamepad restored to local Android TV navigation\"}"
+                        "{\"status\":\"ok\",\"mode\":\"LOCAL_ANDROID_TV\",\"provider\":\"\",\"message\":\"Gamepad restored to local Android TV navigation\"}"
                     )
                 }
 
@@ -171,8 +183,9 @@ class SunshineHandoffServer(
                 // Status query (accepts GET or POST for script compatibility)
                 (method == "GET" || method == "POST") && path == "/api/status" -> {
                     val currentMode = SunshineHandoffManager.currentMode.value
+                    val activeProv = SunshineHandoffManager.activeProvider.value?.id.orEmpty()
                     val quickToggle = "HOLD_GUIDE_SELECT_2.5S"
-                    val json = "{\"status\":\"ok\",\"mode\":\"${currentMode.name}\",\"title\":\"${currentMode.title}\",\"quickToggleCombo\":\"$quickToggle\",\"port\":$port}"
+                    val json = "{\"status\":\"ok\",\"mode\":\"${currentMode.name}\",\"provider\":\"$activeProv\",\"title\":\"${currentMode.title}\",\"quickToggleCombo\":\"$quickToggle\",\"port\":$port}"
                     sendResponse(output, 200, "OK", json)
                 }
 

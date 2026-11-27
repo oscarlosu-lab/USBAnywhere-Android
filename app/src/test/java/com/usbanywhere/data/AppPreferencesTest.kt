@@ -36,5 +36,23 @@ class AppPreferencesTest {
         assertEquals("pref_sunshine_port", AppPreferences.KEY_SUNSHINE_PORT)
         assertEquals("pref_notifications_enabled", AppPreferences.KEY_NOTIFICATIONS_ENABLED)
         assertEquals("pref_haptic_feedback_enabled", AppPreferences.KEY_HAPTIC_FEEDBACK_ENABLED)
+        assertEquals("pref_bind_address", AppPreferences.KEY_BIND_ADDRESS)
+    }
+
+    @Test
+    fun testBindAddressValidation() {
+        assertTrue(AppPreferences.isValidBindAddress(""))
+        assertTrue(AppPreferences.isValidBindAddress("0.0.0.0"))
+        assertTrue(AppPreferences.isValidBindAddress("100.64.1.10"))
+        assertTrue(AppPreferences.isValidBindAddress("::1"))
+        assertFalse(AppPreferences.isValidBindAddress("999.999.1.1"))
+        assertFalse(AppPreferences.isValidBindAddress("not-an-ip"))
+    }
+
+    @Test
+    fun testDeviceHandoffPolicyValues() {
+        val policies = com.usbanywhere.gaming.sunshine.DeviceHandoffPolicy.entries
+        assertEquals(3, policies.size)
+        assertTrue(policies.contains(com.usbanywhere.gaming.sunshine.DeviceHandoffPolicy.ONLY_DURING_STREAM))
     }
 }

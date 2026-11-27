@@ -10,8 +10,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+enum class StreamProvider(val id: String) {
+    SUNSHINE("sunshine"),
+    APOLLO("apollo"),
+    VIBEPOLLO("vibepollo"),
+    VIBESHINE("vibeshine"),
+    PARSEC("parsec"),
+    STEAM_REMOTE_PLAY("steam_remote_play"),
+    GENERIC("generic");
+
+    companion object {
+        fun fromQuery(raw: String?): StreamProvider {
+            val clean = raw?.trim()?.lowercase().orEmpty()
+            return entries.firstOrNull { it.id == clean } ?: SUNSHINE
+        }
+    }
+}
+
+enum class DeviceHandoffPolicy {
+    ALWAYS_LOCAL,
+    ONLY_DURING_STREAM,
+    ALWAYS_FORWARD
+}
+
 /**
- * Coordinates Sunshine/Moonlight streaming handoff state, local HTTP webhook server,
+ * Coordinates Sunshine/Moonlight/Apollo/Parsec/Steam streaming handoff state, local HTTP webhook server,
  * and gamepad quick-toggle button combo detection.
  */
 object SunshineHandoffManager {
@@ -20,6 +43,9 @@ object SunshineHandoffManager {
 
     private val _currentMode = MutableStateFlow(HandoffMode.LOCAL_ANDROID_TV)
     val currentMode: StateFlow<HandoffMode> = _currentMode.asStateFlow()
+
+    private val _activeProvider = MutableStateFlow<StreamProvider?>(null)
+    val activeProvider: StateFlow<StreamProvider?> = _activeProvider.asStateFlow()
 
     private val _comboProgress = MutableStateFlow(0f)
     val comboProgress: StateFlow<Float> = _comboProgress.asStateFlow()
@@ -55,6 +81,19 @@ object SunshineHandoffManager {
             _currentMode.value = mode
             Log.i(TAG, "Handoff Mode transitioned to: ${mode.name}")
         }
+        if (mode == HandoffMode.LOCAL_ANDROID_TV) {
+            _activeProvider.value = null
+        }
+    }
+
+    fun setActiveProvider(provider: StreamProvider?) {
+        _activeProvider.value = provider
+    }
+
+    fun shouldForwardDevice(policy: DeviceHandoffPolicy, mode: HandoffMode = _currentMode.value): Boolean = when (policy) {
+        DeviceHandoffPolicy.ALWAYS_LOCAL -> false
+        DeviceHandoffPolicy.ALWAYS_FORWARD -> true
+        DeviceHandoffPolicy.ONLY_DURING_STREAM -> mode == HandoffMode.STREAMING_PC
     }
 
     fun toggleMode(): HandoffMode {

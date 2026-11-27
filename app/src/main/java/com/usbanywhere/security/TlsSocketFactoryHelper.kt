@@ -2,9 +2,13 @@ package com.usbanywhere.security
 
 import android.util.Log
 import java.net.Socket
+import java.nio.charset.StandardCharsets
 import java.security.KeyStore
+import java.security.MessageDigest
 import java.security.SecureRandom
+import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
+import java.util.Locale
 import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLServerSocket
@@ -60,5 +64,35 @@ object TlsSocketFactoryHelper {
         sslSocket.enabledProtocols = arrayOf("TLSv1.3", "TLSv1.2")
         sslSocket.startHandshake()
         return sslSocket
+    }
+
+    fun computeCertSha256(cert: X509Certificate): String {
+        val digest = MessageDigest.getInstance("SHA-256").digest(cert.encoded)
+        return digest.joinToString("") { String.format(Locale.US, "%02x", it.toInt() and 0xFF) }
+    }
+
+    fun createPinnedTlsContext(expectedSha256: String): SSLContext {
+        val cleanExpected = expectedSha256.trim().lowercase(Locale.US)
+        val pinnedTrustManager = arrayOf<TrustManager>(
+            object : X509TrustManager {
+                override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+                    val leaf = chain?.firstOrNull()
+                        ?: throw CertificateException("Missing peer certificate")
+                    val actual = computeCertSha256(leaf)
+                    val ok = cleanExpected.isNotEmpty() && MessageDigest.isEqual(
+                        actual.toByteArray(StandardCharsets.US_ASCII),
+                        cleanExpected.toByteArray(StandardCharsets.US_ASCII)
+                    )
+                    if (!ok) {
+                        throw CertificateException("TLS certificate SHA-256 pin mismatch")
+                    }
+                }
+                override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
+            }
+        )
+        val ctx = SSLContext.getInstance("TLS")
+        ctx.init(null, pinnedTrustManager, SecureRandom())
+        return ctx
     }
 }

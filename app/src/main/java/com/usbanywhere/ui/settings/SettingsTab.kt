@@ -88,6 +88,8 @@ fun SettingsTab(viewModel: SettingsViewModel) {
     val notificationsEnabled by viewModel.isNotificationsEnabled.collectAsStateWithLifecycle()
     val hapticFeedbackEnabled by viewModel.isHapticFeedbackEnabled.collectAsStateWithLifecycle()
     val isRootAvailable by viewModel.isRootAvailable.collectAsStateWithLifecycle()
+    val bindAddress by viewModel.bindAddress.collectAsStateWithLifecycle()
+    val updateState by viewModel.updateState.collectAsStateWithLifecycle()
     val logs by viewModel.logs.collectAsStateWithLifecycle()
 
     LazyColumn(
@@ -320,6 +322,83 @@ fun SettingsTab(viewModel: SettingsViewModel) {
                         defaultPort = com.usbanywhere.data.AppPreferences.DEFAULT_SUNSHINE_PORT,
                         onReset = { viewModel.setSunshinePort(com.usbanywhere.data.AppPreferences.DEFAULT_SUNSHINE_PORT) }
                     )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(CardBorder))
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    var bindInput by remember(bindAddress) { mutableStateOf(bindAddress) }
+                    Text(
+                        text = "BIND INTERFACE IP (EMPTY = ALL)",
+                        color = Color.Gray,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        androidx.compose.material3.OutlinedTextField(
+                            value = bindInput,
+                            onValueChange = { bindInput = it },
+                            singleLine = true,
+                            placeholder = { Text("0.0.0.0 (all interfaces)", fontSize = 12.sp) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        Button(
+                            onClick = { viewModel.setBindAddress(bindInput) },
+                            colors = ButtonDefaults.buttonColors(containerColor = ElectricBlue)
+                        ) {
+                            Text("Save", color = Color.Black, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(CardBorder))
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Text(
+                        text = "APP UPDATES (GITHUB RELEASES + SHA-256)",
+                        color = Color.Gray,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    when (val st = updateState) {
+                        is UpdateUiState.Idle, is UpdateUiState.UpToDate, is UpdateUiState.Error -> {
+                            val label = when (st) {
+                                is UpdateUiState.UpToDate -> "Up to date (v${st.currentVersion}) — Check Again"
+                                is UpdateUiState.Error -> "Error: ${st.message} — Retry"
+                                else -> "Check for Updates"
+                            }
+                            Button(
+                                onClick = { viewModel.checkForUpdates() },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B))
+                            ) {
+                                Text(label, color = Color.White, fontSize = 12.sp)
+                            }
+                        }
+                        is UpdateUiState.Checking -> Text("Checking GitHub Releases...", color = NeonCyan, fontSize = 12.sp)
+                        is UpdateUiState.Available -> {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("v${st.info.latestVersion} available", color = NeonGreen, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Button(
+                                    onClick = { viewModel.downloadAndInstallUpdate(st.info) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = NeonGreen)
+                                ) {
+                                    Text("Download & Install", color = Color.Black, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                        is UpdateUiState.Downloading -> Text("Downloading & verifying SHA-256: ${st.progress}%", color = NeonCyan, fontSize = 12.sp)
+                        is UpdateUiState.ReadyToInstall -> Text("Verified v${st.version} — installer launched.", color = NeonGreen, fontSize = 12.sp)
+                    }
                 }
             }
         }
@@ -619,15 +698,19 @@ fun PortSettingRow(
 fun WanMeshCard() {
     val netInfo by WanInterfaceDetector.networkInfo.collectAsStateWithLifecycle()
     var showQr by remember { mutableStateOf(false) }
+    var pairingCode by remember { mutableStateOf(com.usbanywhere.security.PairingCodeManager.createCode()) }
 
     val host = netInfo.meshIp ?: "127.0.0.1"
-    val token = remember(host) {
+    val token = remember(host, pairingCode) {
         WanPairingToken.PairingData(
             host = host,
             port = 3240,
             serverName = "USBAnywhere-Android",
-            isTlsEnabled = false
-        ).toCompactToken()
+            isTlsEnabled = true,
+            tlsPort = 3243,
+            pairingCode = pairingCode,
+            tlsFingerprint = ""
+        ).toUa2Token()
     }
 
     Card(
@@ -688,7 +771,7 @@ fun WanMeshCard() {
                     .background(Color(0xFF0D1117), RoundedCornerShape(8.dp))
                     .padding(10.dp)
             ) {
-                Text(text = "WAN PAIRING TOKEN:", color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                Text(text = "PAIRING CODE: ${pairingCode.chunked(3).joinToString(" ")}  •  UA2 TOKEN:", color = NeonGreen, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = token,
@@ -711,6 +794,16 @@ fun WanMeshCard() {
                     Icon(imageVector = Icons.Default.QrCode2, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(text = if (showQr) "Hide QR Code" else "Show QR Code", fontSize = 11.sp)
+                }
+                Button(
+                    onClick = { pairingCode = com.usbanywhere.security.PairingCodeManager.createCode() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.tvFocusRing(RoundedCornerShape(8.dp))
+                ) {
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(text = "New 6-Digit Code", fontSize = 11.sp)
                 }
             }
 

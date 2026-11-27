@@ -29,6 +29,7 @@ object AppPreferences {
     const val KEY_SUNSHINE_TOKEN = "pref_sunshine_token"
     const val KEY_NOTIFICATIONS_ENABLED = "pref_notifications_enabled"
     const val KEY_HAPTIC_FEEDBACK_ENABLED = "pref_haptic_feedback_enabled"
+    const val KEY_BIND_ADDRESS = "pref_bind_address"
 
     // Default values: Strictly Non-Intrusive & Opt-in
     const val DEFAULT_AUTOSTART_ON_BOOT = false
@@ -129,6 +130,39 @@ object AppPreferences {
 
     fun setHapticFeedbackEnabled(context: Context, enabled: Boolean) {
         getPrefs(context).edit().putBoolean(KEY_HAPTIC_FEEDBACK_ENABLED, enabled).apply()
+    }
+
+    fun isValidBindAddress(ip: String?): Boolean {
+        val s = ip?.trim().orEmpty()
+        if (s.isEmpty() || s == "0.0.0.0" || s == "::" || s.equals("any", ignoreCase = true)) return true
+        val ipv4 = Regex("""^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$""")
+        if (ipv4.matches(s)) return true
+        return s.contains(':') && s.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' || it == ':' || it == '.' }
+    }
+
+    fun getBindAddress(context: Context): String {
+        val raw = getPrefs(context).getString(KEY_BIND_ADDRESS, "")?.trim().orEmpty()
+        return if (isValidBindAddress(raw)) raw else ""
+    }
+
+    fun setBindAddress(context: Context, ip: String) {
+        val s = ip.trim()
+        val normalized = if (s == "0.0.0.0" || s.equals("any", ignoreCase = true) || !isValidBindAddress(s)) "" else s
+        getPrefs(context).edit().putString(KEY_BIND_ADDRESS, normalized).apply()
+    }
+
+    fun getDeviceHandoffPolicy(context: Context, busId: String): com.usbanywhere.gaming.sunshine.DeviceHandoffPolicy {
+        val raw = getPrefs(context).getString("pref_handoff_policy_$busId", null)
+        return try {
+            if (raw != null) com.usbanywhere.gaming.sunshine.DeviceHandoffPolicy.valueOf(raw)
+            else com.usbanywhere.gaming.sunshine.DeviceHandoffPolicy.ONLY_DURING_STREAM
+        } catch (_: Exception) {
+            com.usbanywhere.gaming.sunshine.DeviceHandoffPolicy.ONLY_DURING_STREAM
+        }
+    }
+
+    fun setDeviceHandoffPolicy(context: Context, busId: String, policy: com.usbanywhere.gaming.sunshine.DeviceHandoffPolicy) {
+        getPrefs(context).edit().putString("pref_handoff_policy_$busId", policy.name).apply()
     }
 
     /**

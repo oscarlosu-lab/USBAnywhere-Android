@@ -196,15 +196,36 @@ class UsbIpServerService : Service() {
         } catch (_: Exception) {}
     }
 
+    private fun resolveBindInetAddress(): java.net.InetAddress? {
+        val raw = com.usbanywhere.data.AppPreferences.getBindAddress(applicationContext).trim()
+        if (raw.isEmpty() || raw == "0.0.0.0") return null
+        return try {
+            java.net.InetAddress.getByName(raw)
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun openBoundServerSocket(port: Int, bindAddr: java.net.InetAddress?): ServerSocket {
+        if (bindAddr == null) return ServerSocket(port)
+        return try {
+            ServerSocket(port, 50, bindAddr)
+        } catch (e: Exception) {
+            Log.w(TAG, "Bind to ${bindAddr.hostAddress}:$port failed (${e.message}), falling back to 0.0.0.0:$port")
+            ServerSocket(port)
+        }
+    }
+
     private fun startServer() {
         if (serverSocket != null && !serverSocket!!.isClosed) return
 
         acceptJob = serviceScope.launch {
             try {
                 val port = com.usbanywhere.data.AppPreferences.getServerPort(applicationContext)
-                val socket = ServerSocket(port)
+                val bindAddr = resolveBindInetAddress()
+                val socket = openBoundServerSocket(port, bindAddr)
                 serverSocket = socket
-                val localIp = getLocalIpAddress()
+                val localIp = bindAddr?.hostAddress ?: getLocalIpAddress()
 
                 _serverStats.value = ServerRuntimeStats(
                     isRunning = true,
@@ -355,7 +376,7 @@ class UsbIpServerService : Service() {
         tcpControlJob?.cancel()
         tcpControlJob = serviceScope.launch {
             try {
-                val ctrlSocket = ServerSocket(DISCOVERY_PORT)
+                val ctrlSocket = openBoundServerSocket(DISCOVERY_PORT, resolveBindInetAddress())
                 tcpControlSocket = ctrlSocket
                 while (isActive && !ctrlSocket.isClosed) {
                     val client = try { ctrlSocket.accept() } catch (_: Exception) { break }
@@ -367,11 +388,24 @@ class UsbIpServerService : Service() {
                             val cmd = parts.firstOrNull()?.uppercase() ?: ""
                             val arg = parts.getOrNull(1)?.trim() ?: ""
                             val hm = UsbHostManager.get(applicationContext)
-                            val mutating = cmd == "BIND" || cmd == "UNBIND"
+                            val mutating = cmd == "BIND" || cmd == "UNBIND" || cmd == "PAIR"
                             val response = if (mutating && !isTrustedControlPeer(client.inetAddress)) {
                                 Log.w(TAG, "Rejected $cmd from untrusted peer ${client.inetAddress}")
                                 org.json.JSONObject().put("status", "ERROR").put("message", "Forbidden").toString()
                             } else when (cmd) {
+                                "PAIR" -> {
+                                    val vr = com.usbanywhere.security.PairingCodeManager.verifyCode(arg)
+                                    if (!vr.success) {
+                                        org.json.JSONObject().put("status", "DENIED").put("message", vr.message).toString()
+                                    } else {
+                                        org.json.JSONObject()
+                                            .put("status", "OK")
+                                            .put("control_token", vr.controlToken)
+                                            .put("tls_port", com.usbanywhere.security.TlsSocketFactoryHelper.TLS_PORT)
+                                            .put("tls_fingerprint", "")
+                                            .toString()
+                                    }
+                                }
                                 "LIST" -> {
                                     val arr = org.json.JSONArray()
                                     for (d in hm.connectedDevices.value) {
@@ -397,9 +431,9 @@ class UsbIpServerService : Service() {
                                 "STATUS" -> {
                                     val versionName = try {
                                         @Suppress("DEPRECATION")
-                                        packageManager.getPackageInfo(packageName, 0).versionName ?: "3.4.1"
+                                        packageManager.getPackageInfo(packageName, 0).versionName ?: "3.5.0"
                                     } catch (_: Exception) {
-                                        "3.4.1"
+                                        "3.5.0"
                                     }
                                     org.json.JSONObject()
                                         .put("status", "OK")

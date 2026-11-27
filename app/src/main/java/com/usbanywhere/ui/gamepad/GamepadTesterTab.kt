@@ -78,6 +78,7 @@ fun GamepadTesterTab() {
     val isSimulating by GamepadInputManager.isSimulating.collectAsStateWithLifecycle()
     val activeProfile by GamepadInputManager.activeProfile.collectAsStateWithLifecycle()
     val handoffMode by SunshineHandoffManager.currentMode.collectAsStateWithLifecycle()
+    val activeProvider by SunshineHandoffManager.activeProvider.collectAsStateWithLifecycle()
     val comboProgress by SunshineHandoffManager.comboProgress.collectAsStateWithLifecycle()
     val multiplayerSlots by MultiplayerHubManager.slots.collectAsStateWithLifecycle()
 
@@ -108,6 +109,7 @@ fun GamepadTesterTab() {
         item {
             SunshineHandoffCard(
                 mode = handoffMode,
+                activeProvider = activeProvider?.id,
                 comboProgress = comboProgress,
                 onToggle = { SunshineHandoffManager.toggleMode() }
             )
@@ -652,6 +654,7 @@ fun EsportsProfileCard(profileName: String) {
 @Composable
 fun SunshineHandoffCard(
     mode: HandoffMode,
+    activeProvider: String? = null,
     comboProgress: Float,
     onToggle: () -> Unit
 ) {
@@ -698,7 +701,11 @@ fun SunshineHandoffCard(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = mode.badgeText,
+                        text = if (mode == HandoffMode.STREAMING_PC && !activeProvider.isNullOrBlank()) {
+                            "${mode.badgeText} • ${activeProvider.uppercase()}"
+                        } else {
+                            mode.badgeText
+                        },
                         color = modeColor,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold

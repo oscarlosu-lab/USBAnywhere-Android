@@ -2,7 +2,7 @@
 
 🌐 **Idioma / Language:** [English](README.md) | **Español**
 
-**v3.4.1** | **Parte del [Ecosistema USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)**  
+**v3.5.0** | **Parte del [Ecosistema USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)**  
 [🌍 Web Oficial](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases y APK](https://github.com/oscarlosu-lab/USBAnywhere-Android/releases/latest) | [🔗 USBAnywhere Cliente Windows](https://github.com/oscarlosu-lab/USBAnywhere) | [🖥️ USBAnywhere Servidor Windows](https://github.com/oscarlosu-lab/USBAnywhere-Server) | [💬 Comunidad Reddit](https://www.reddit.com/r/UsbAnywhere/) | [☀️ Guía Sunshine & Moonlight](docs/SUNSHINE_MOONLIGHT_INTEGRATION_ES.md) | [📖 Roadmap Estratégico](ROADMAP.md) | [🔄 Workflow de Ingeniería](WORKFLOW.md)
 
 [![Android CI](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/oscarlosu-lab/USBAnywhere-Android/actions/workflows/ci.yml)
@@ -170,6 +170,11 @@ La interfaz de usuario está desarrollada íntegramente en **Jetpack Compose Mat
 ```
 
 ---
+
+## 🆕 Novedades en v3.5.0
+- 🔐 **Emparejamiento 6 dígitos y Tokens `UA2:` (`WanMeshCard`, `PairingCodeManager`, `TlsSocketFactoryHelper`)** - Códigos efímeros de 6 dígitos (TTL 5 min, bloqueo tras 5 fallos), `BindAddress`, comando `PAIR` y pinning TLS SHA-256.
+- 🎮 **Handoff Multi-Streaming y Política por Dispositivo** - Soporte con badge en vivo para **Sunshine, Apollo, Vibeshine, Vibepollo, Parsec y Steam Remote Play**, más selector por dispositivo (`Local` / `Stream Only` / `Always PC`).
+- ⬆️ **Actualizador en 1 Clic con SHA-256 y Nuevo Icono Adaptativo**.
 
 ## 🆕 Novedades en v3.4.1
 
