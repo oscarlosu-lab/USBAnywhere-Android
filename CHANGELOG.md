@@ -9,6 +9,11 @@
   - Extended webhook & UI badge support to **Sunshine, Apollo, Vibeshine, Vibepollo, Parsec, and Steam Remote Play** (`?provider=...`), plus per-device `DeviceHandoffPolicy` (`Local` / `Stream Only` / `Always PC`).
 - **One-Click SHA-256 GitHub Releases Updater (`AndroidUpdateChecker`) & Updated 8-Layer Adaptive Icon**.
 
+### Fixed
+- **Pre-Release E2E & Stress Hardening (`UsbIpServerService`, `MainActivity`, `AppPreferences`, `SettingsTab`)**:
+  - Enforced strict `busId` format validation (`^\d+-[\d.]+$`) on TCP `3241` `BIND`/`UNBIND` commands and added `"token"`/`"control_token"`/`"server"`/`"server_name"` pairing payload aliases.
+  - Moved `syncComponentState`, `UsbDeviceCatalog.initialize`, and `CyberQrGenerator.generateMatrix` off the UI thread to eliminate main-thread ANRs under load.
+
 ## [3.4.1] - 2026-11-27
 
 ### Fixed

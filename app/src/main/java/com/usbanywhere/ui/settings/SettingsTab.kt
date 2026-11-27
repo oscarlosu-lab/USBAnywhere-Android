@@ -3,6 +3,7 @@ package com.usbanywhere.ui.settings
 import com.usbanywhere.ui.components.TvSwitch
 import com.usbanywhere.ui.components.tvFocusRing
 import androidx.compose.foundation.background
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -894,7 +895,13 @@ fun UsbAudioBridgeCard() {
 
 @Composable
 fun CyberQrMatrixView(data: String) {
-    val matrix = remember(data) { CyberQrGenerator.generateMatrix(data) }
+    var matrix by remember(data) { mutableStateOf<Array<BooleanArray>?>(null) }
+    LaunchedEffect(data) {
+        matrix = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            CyberQrGenerator.generateMatrix(data)
+        }
+    }
+    val resolved = matrix ?: return
     val size = CyberQrGenerator.MATRIX_SIZE
 
     androidx.compose.foundation.Canvas(
@@ -906,7 +913,7 @@ fun CyberQrMatrixView(data: String) {
         val cellSize = this.size.width / size
         for (r in 0 until size) {
             for (c in 0 until size) {
-                if (matrix[r][c]) {
+                if (resolved[r][c]) {
                     drawRect(
                         color = Color.Black,
                         topLeft = androidx.compose.ui.geometry.Offset(c * cellSize, r * cellSize),

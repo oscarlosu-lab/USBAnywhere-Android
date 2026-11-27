@@ -19,6 +19,9 @@ import com.usbanywhere.gamepad.GamepadInputManager
 import com.usbanywhere.gaming.sunshine.SunshineHandoffManager
 import com.usbanywhere.theme.USBAnywhereTheme
 import com.usbanywhere.ui.AppNavHost
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -29,8 +32,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        com.usbanywhere.data.AppPreferences.syncComponentState(applicationContext)
-        UsbDeviceCatalog.initialize(applicationContext)
+        val appCtx = applicationContext
+        CoroutineScope(Dispatchers.IO).launch {
+            com.usbanywhere.data.AppPreferences.syncComponentState(appCtx)
+            UsbDeviceCatalog.initialize(appCtx)
+        }
         SunshineHandoffManager.initialize(applicationContext)
 
         val isTv = isAndroidTv()

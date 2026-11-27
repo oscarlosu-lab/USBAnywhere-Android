@@ -165,40 +165,47 @@ object AppPreferences {
         getPrefs(context).edit().putString("pref_handoff_policy_$busId", policy.name).apply()
     }
 
+    private val syncExecutor = java.util.concurrent.Executors.newSingleThreadExecutor()
+
     /**
-     * Synchronizes Android OS Component visibility with user preferences.
-     * When disabled, the OS components are marked COMPONENT_ENABLED_STATE_DISABLED,
-     * which prevents Android from waking the process on boot or displaying
-     * "Open USBAnywhere" popups when USB devices are attached.
+     * Synchronizes Android OS Component visibility with user preferences off the main thread.
+     * Only calls PackageManager.setComponentEnabledSetting when state actually differs.
      */
     fun syncComponentState(context: Context) {
-        try {
-            val pm = context.packageManager ?: return
-            val bootComponent = ComponentName(context, "com.usbanywhere.receiver.BootCompletedReceiver")
-            val usbComponent = ComponentName(context, "com.usbanywhere.receiver.UsbAttachedReceiver")
+        val appCtx = context.applicationContext ?: context
+        syncExecutor.execute {
+            try {
+                val pm = appCtx.packageManager ?: return@execute
+                val bootComponent = ComponentName(appCtx, "com.usbanywhere.receiver.BootCompletedReceiver")
+                val usbComponent = ComponentName(appCtx, "com.usbanywhere.receiver.UsbAttachedReceiver")
 
-            val bootWanted = isAutostartOnBoot(context)
-            val usbWanted = isAutostartOnUsb(context)
+                val bootWanted = isAutostartOnBoot(appCtx)
+                val usbWanted = isAutostartOnUsb(appCtx)
 
-            val bootState = if (bootWanted) {
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            } else {
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                val bootState = if (bootWanted) {
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                } else {
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                }
+
+                val usbState = if (usbWanted) {
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                } else {
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                }
+
+                if (pm.getComponentEnabledSetting(bootComponent) != bootState) {
+                    pm.setComponentEnabledSetting(bootComponent, bootState, PackageManager.DONT_KILL_APP)
+                }
+                if (pm.getComponentEnabledSetting(usbComponent) != usbState) {
+                    pm.setComponentEnabledSetting(usbComponent, usbState, PackageManager.DONT_KILL_APP)
+                }
+
+                Log.d(TAG, "Component state synchronized: BootReceiver=$bootWanted, UsbReceiver=$usbWanted")
+            } catch (e: Throwable) {
+                // Defensive wrapper for mock test environments or restricted devices
+                Log.w(TAG, "Could not sync component enabled settings: ${e.message}")
             }
-
-            val usbState = if (usbWanted) {
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            } else {
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-            }
-
-            pm.setComponentEnabledSetting(bootComponent, bootState, PackageManager.DONT_KILL_APP)
-            pm.setComponentEnabledSetting(usbComponent, usbState, PackageManager.DONT_KILL_APP)
-
-            Log.d(TAG, "Component state synchronized: BootReceiver=$bootWanted, UsbReceiver=$usbWanted")
-        } catch (e: Throwable) {
-            // Defensive wrapper for mock test environments or restricted devices
-            Log.w(TAG, "Could not sync component enabled settings: ${e.message}")
         }
     }
 }

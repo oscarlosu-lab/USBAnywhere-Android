@@ -44,6 +44,10 @@ class UsbIpServerService : Service() {
         private const val CHANNEL_ID = "usbanywhere_server_channel"
         private const val NOTIFICATION_ID = 3240
         private const val DISCOVERY_PORT = 3241
+        private val BUSID_REGEX = Regex("^\\d+-[\\d.]+$")
+
+        internal fun isValidBusId(busId: String?): Boolean =
+            !busId.isNullOrBlank() && BUSID_REGEX.matches(busId.trim())
         private const val PROBE_MESSAGE = "USBANYWHERE_DISCOVERY_PROBE"
         private const val NSD_SERVICE_TYPE = "_usbanywhere._tcp"
 
@@ -398,8 +402,12 @@ class UsbIpServerService : Service() {
                                     if (!vr.success) {
                                         org.json.JSONObject().put("status", "DENIED").put("message", vr.message).toString()
                                     } else {
+                                        val hostName = android.os.Build.MODEL ?: "Android"
                                         org.json.JSONObject()
                                             .put("status", "OK")
+                                            .put("server", hostName)
+                                            .put("server_name", hostName)
+                                            .put("token", vr.controlToken)
                                             .put("control_token", vr.controlToken)
                                             .put("tls_port", com.usbanywhere.security.TlsSocketFactoryHelper.TLS_PORT)
                                             .put("tls_fingerprint", "")
@@ -421,12 +429,20 @@ class UsbIpServerService : Service() {
                                     org.json.JSONObject().put("devices", arr).toString()
                                 }
                                 "BIND" -> {
-                                    hm.setDeviceShared(arg, true)
-                                    org.json.JSONObject().put("status", "OK").put("busid", arg).toString()
+                                    if (!isValidBusId(arg)) {
+                                        org.json.JSONObject().put("status", "ERROR").put("busid", arg).put("message", "Invalid BusId").toString()
+                                    } else {
+                                        hm.setDeviceShared(arg, true)
+                                        org.json.JSONObject().put("status", "OK").put("busid", arg).toString()
+                                    }
                                 }
                                 "UNBIND" -> {
-                                    hm.setDeviceShared(arg, false)
-                                    org.json.JSONObject().put("status", "OK").put("busid", arg).toString()
+                                    if (!isValidBusId(arg)) {
+                                        org.json.JSONObject().put("status", "ERROR").put("busid", arg).put("message", "Invalid BusId").toString()
+                                    } else {
+                                        hm.setDeviceShared(arg, false)
+                                        org.json.JSONObject().put("status", "OK").put("busid", arg).toString()
+                                    }
                                 }
                                 "STATUS" -> {
                                     val versionName = try {
